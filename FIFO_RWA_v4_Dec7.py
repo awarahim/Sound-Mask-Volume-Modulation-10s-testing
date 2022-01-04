@@ -299,7 +299,7 @@ def thread_mask():
     p1.join()
     p2.join()
     p3.join()
-    p4.terminate()
+    p4.terminate()  # make volume modulation stop when other three processes stopped
             
     print('End')
 
