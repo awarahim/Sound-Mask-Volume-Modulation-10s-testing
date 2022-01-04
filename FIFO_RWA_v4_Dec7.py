@@ -299,7 +299,7 @@ def thread_mask():
     p1.join()
     p2.join()
     p3.join()
-    p4.join()
+    p4.terminate()
             
     print('End')
 
@@ -395,4 +395,6 @@ if __name__ == '__main__':
 #
 # Action needed: figure out "v_threshold" value that is necessary for the change in volume
 # Observation: if the printing of the vol_mod and volume difference continue even after the whitenoise done playing
+# meaning the mic, speaker, whitenoise thread finished first then the volume modulation ended.
+# Action needed: stop volume modulation when all all these three processes stop.
 
