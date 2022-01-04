@@ -101,6 +101,7 @@ def Multithread_mic(q1, q2, duration):
     t1.join()
     t2.join()
     
+    print("Mic recording is stopped")
 #######################################################################################################################################    
 # Second Thread for simultaneous calculate the moving average of compiled RMS values
 def Moving_Average(q1, q2, q3, q4, window= 10):
@@ -167,7 +168,7 @@ def Moving_Average(q1, q2, q3, q4, window= 10):
         break    
     print('Moving Average Stopped')
 #####################################################################################################################
-def comparator(difference, current_vol, window=10, nu=1, v_threshold=300):
+def comparator(difference, current_vol, window=10, nu=1, v_threshold=100):
     # nu : the step size of volume being increased or decreased, in percent, ex: 1 = 1%
     # v_threshold : upper limit of the difference between the mics values
     # return: new volume
@@ -197,11 +198,11 @@ def comparator(difference, current_vol, window=10, nu=1, v_threshold=300):
 def set_volume(volume=20):
     # Set the current volume to a percentage. default is 20%
         
-    if volume >= 0 and volume <= 70: # 70 might be the loudest and still not disturbing. Need to check!
+    if volume > 0 and volume <= 70: # 70 might be the loudest and still not disturbing. Need to check!
         call(["amixer", "-D", "pulse", "sset", "Master", str(volume)+"%"])
     
     else:
-        volume = 20 # temporary conditions
+        volume = 0 # temporary conditions
 
 # Third Thread for simultaneous volume modulation
 def main_volume_modulation(q3, q4, W=10):
@@ -214,7 +215,7 @@ def main_volume_modulation(q3, q4, W=10):
     RATE = 48000             # 48kHz
     FRAMES_PER_BUFFER = 1024
     set_volume(10)
-    current_volume = 10 # initializes current volume
+    current_volume = 0 # initializes current volume
     
     while True:
     
@@ -278,7 +279,7 @@ def whitenoise(duration=4):
 def thread_mask():    
     
     print('Start')
-    period = 120
+    period = 10
     window = 10
     q1 = mp.Queue()
     q2 = mp.Queue()
@@ -286,17 +287,17 @@ def thread_mask():
     q4 = mp.Queue()
 
     p1 = mp.Process(target=Multithread_mic, args=(q1,q2,period))
-#     p2 = mp.Process(target=whitenoise, args=(period,))
+    p2 = mp.Process(target=whitenoise, args=(period,))
     p3 = mp.Process(target=Moving_Average, args=(q1, q2, q3, q4, window))
     p4 = mp.Process(target=main_volume_modulation, args = (q3,q4, window))
     
     p1.start()
-#     p2.start()
+    p2.start()
     p3.start()
     p4.start()
     
     p1.join()
-#     p2.join()
+    p2.join()
     p3.join()
     p4.join()
             
@@ -379,3 +380,18 @@ if __name__ == '__main__':
 # Today, speaker is not detected although after being unplug: I think I broke the speaker
 # before that, the volume modulation was not able to control the system volume. They were not the same
 # Tested for 120s, but the volume modulation never stopped
+
+# 01/04/2022
+# The overall codes are successful for any time period.
+# attention: if the absolute volume difference is smaller than 100 then there will be no changes in volume
+#            where below is not printed: 
+#                           Simple mixer control 'Master',0
+#                           Capabilities: pvolume pswitch pswitch-joined
+#                           Playback channels: Front Left - Front Right
+#                           Limits: Playback 0 - 65536
+#                           Mono:
+#                           Front Left: Playback 6554 [10%] [on]
+#                           Front Right: Playback 6554 [10%] [on]
+#
+# Action needed: figure out "v_threshold" value that is necessary for the change in volume
+# Observation: if the printing of the vol_mod and volume difference continue even after the whitenoise done playing
