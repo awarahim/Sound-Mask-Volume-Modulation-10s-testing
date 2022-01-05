@@ -19,6 +19,7 @@ FORMAT  = pyaudio.paInt16    # 24-bit the mic is 24-bit with sample rate of 96kH
 CHANNELS = 2                 # number of audio streams to use. Since there is one speaker and one mic, use 2 streams
 RATE = 48000                # 48kHz since mic is specific at 48kHz
 FRAMES_PER_BUFFER = 1024    # 
+STOP = False
 
 # calculate RMS of data chunk
 def rms(data):
@@ -45,20 +46,25 @@ def ref_mic(p, q1, duration):
         input_device_index=3,
         stream_callback = callback)
     
-    # start stream
-    stream2.start_stream()
-    
-    # control how long the stream to record
-    time.sleep(duration)
-    
-    # stop stream
-    stream2.stop_stream()
+    while STOP == False:
+        # start stream
+        stream2.start_stream()
+
+        # control how long the stream to record
+        time.sleep(duration)
+
+        # stop stream
+        stream2.stop_stream()
+        
+        if stopping == 'a':
+            STOP = True
+      
     
     stream2.close()
 #     p.terminate()
     
     # Send signal it stopped recording
-    q1.put("Stop")
+#    q1.put("Stop")
     
 def error_mic(p, q2, duration):
     def callback2(in_data2, frame_count2, time_info2, status2):
@@ -76,18 +82,23 @@ def error_mic(p, q2, duration):
         input_device_index=2,
         stream_callback = callback2)
     
-    # start stream
-    stream.start_stream()
+    while STOP == False:
+        # start stream
+        stream.start_stream()
+
+        # control how long the stream to record
+        time.sleep(duration)
+
+        # stop stream
+        stream.stop_stream()
+        
+        if stopping == 'a':
+            STOP = True
     
-    # duration control how long the stream to record
-    time.sleep(duration)
-    
-    # stop stream
-    stream.stop_stream()
     stream.close()
 #     p.terminate()
     
-    q2.put("Stop")
+#    q2.put("Stop")
 
 def device_check():
     p = pyaudio.PyAudio()
@@ -156,7 +167,7 @@ def Moving_Average(q1, q2, q3, q4, window= 10):
             getQ1 = q1.get()
             getQ2 = q2.get()
             
-            if getQ1 == "Stop" or getQ2 == "Stop":
+            if stopping == 'a':
                 break
 
             # Calculate next one step window of the data
@@ -174,9 +185,8 @@ def Moving_Average(q1, q2, q3, q4, window= 10):
         
         print('Im out')
         # Stopping signal for volume modulation thread
-        q3.put("Stop")
-        q4.put("Stop")
-        break    
+        if stopping == 'a':
+            break    
     print('Moving Average Stopped')
 #####################################################################################################################
 def comparator(difference, current_vol, window=10, nu=1, v_threshold=100):
@@ -234,14 +244,14 @@ def main_volume_modulation(q3, q4, W=10):
     set_volume(10)
     current_volume = 10 # initializes current volume
     
-    while True:
+    while STOP == False:
     
         getQ3 = q3.get()
         getQ4 = q4.get()
         print("vol_mod:",getQ3, getQ4)
         
-        if getQ3 == "Stop" and getQ4 == "Stop":
-                break
+        if stopping == 'a':
+           STOP = True
         
         difference = getQ3 - getQ4    
         new_volume = comparator(difference, current_volume, W, nu=1, v_threshold=100)
@@ -252,17 +262,13 @@ def main_volume_modulation(q3, q4, W=10):
     
 ################################################################################################################################################    
 # Generating White Noise, y(n)
-    
+# BLOCKING MODE    
 def whitenoise(duration=4):
     
     ##### minimum needed to read a wave #############################
     # open the file for reading.
     wf = wave.open('BrownNoise_60s.wav', 'rb')
-    
-    def callback_speaker(in_data, frame_count, time_info, status):
-        data = wf.readframes(frame_count)
-        return data, pyaudio.paContinue
-    
+        
     #create an audio object
     p2 = pyaudio.PyAudio()
     
@@ -271,19 +277,23 @@ def whitenoise(duration=4):
                     channels = wf.getnchannels(),
                     rate = wf.getframerate(),
                     output=True,
-                    output_device_index=1,
-                    stream_callback=callback_speaker)
-    # start stream
-    stream3.start_stream()
-    print("speaker playing")
+                    output_device_index=1)
+    # read data
+    data = wf.readframes(FRAMES_PER_BUFFER)
     
-    # control how long the stream to play
-    time.sleep(duration)
+    print("speaker playing")
+    # play stream
+    
+    while STOP == False:
+        stream3.write(data)
+        data = wf.readframes(FRAMES_PER_BUFFER)
+        
+        if stopping == 'a':
+            STOP = True
     
     # stop stream
     stream3.stop_stream()
 
-        
     print('speaker stopped')    
     # cleanup stuff
     stream3.close()
@@ -291,11 +301,12 @@ def whitenoise(duration=4):
     # close PyAudio
     p2.terminate()
     
-
-
+###########################################################################################
+def signal_handler(STOP):
+    while STOP==False:
+        stopping = str(input('\n\n-----------------\nEnter a to stop'))
 ############################# Main code ###################################################
 def thread_mask():    
-    
     print('Start')
     p = pyaudio.PyAudio()
     
@@ -305,6 +316,7 @@ def thread_mask():
 #         time.sleep(1)
 #         d = device_check()
 #
+    
     device_check()
     period = 60
     window = 10
@@ -317,23 +329,25 @@ def thread_mask():
     p2 = mp.Process(target=whitenoise, args=(period,))
     p3 = mp.Process(target=Moving_Average, args=(q1, q2, q3, q4, window))
     p4 = mp.Process(target=main_volume_modulation, args = (q3,q4, window))
+    p5 = mp.Process(target=signal_handler)
     
     p1.start()
     p2.start()
     p3.start()
     p4.start()
+    p5.start()
     
     p1.join()
     p2.join()
     p3.join()
-    p4.terminate() # make volume modulation process stop when whitenoise and mic stop running
+    p4.join() # make volume modulation process stop when whitenoise and mic stop running
+    p5.join()
     
     print('End')
 
 #######################################################################################################
    
 if __name__ == '__main__':
-    
     thread_mask()
     
 ####################### Notes ##########################################
