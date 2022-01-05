@@ -42,7 +42,7 @@ def ref_mic(p, q1, duration):
         rate=RATE,
         frames_per_buffer=FRAMES_PER_BUFFER,
         input=True,
-        input_device_index=2,
+        input_device_index=3,
         stream_callback = callback)
     
     # start stream
@@ -55,7 +55,7 @@ def ref_mic(p, q1, duration):
     stream2.stop_stream()
     
     stream2.close()
-    p.terminate()
+#     p.terminate()
     
     # Send signal it stopped recording
     q1.put("Stop")
@@ -73,7 +73,7 @@ def error_mic(p, q2, duration):
         rate=RATE,
         frames_per_buffer=FRAMES_PER_BUFFER,
         input=True,
-        input_device_index=3,
+        input_device_index=2,
         stream_callback = callback2)
     
     # start stream
@@ -85,13 +85,22 @@ def error_mic(p, q2, duration):
     # stop stream
     stream.stop_stream()
     stream.close()
-    p.terminate()
+#     p.terminate()
     
     q2.put("Stop")
 
-
-def Multithread_mic(q1, q2, duration):
+def device_check():
     p = pyaudio.PyAudio()
+    devices = []
+    
+    for ii in range(p.get_device_count()):
+        devices.append(p.get_device_info_by_index(ii).get('name'))
+        print(p.get_device_info_by_index(ii).get('name'))
+    
+    return devices
+
+def Multithread_mic(p,q1, q2, duration):
+
     t1 = threading.Thread(target=ref_mic, args=(p,q1,duration))
     t2 = threading.Thread(target=error_mic, args=(p,q2, duration))
     
@@ -101,7 +110,9 @@ def Multithread_mic(q1, q2, duration):
     t1.join()
     t2.join()
     
+    p.terminate()
     print("Mic recording is stopped")
+
 #######################################################################################################################################    
 # Second Thread for simultaneous calculate the moving average of compiled RMS values
 def Moving_Average(q1, q2, q3, q4, window= 10):
@@ -182,28 +193,34 @@ def comparator(difference, current_vol, window=10, nu=1, v_threshold=100):
     if difference >= -v_threshold and difference <= v_threshold:
        new_vol = current_vol
        
-#        print('same baseline')
+       print('same baseline', new_vol)
     
     elif difference < -v_threshold: # reference mic has smaller volume than error mic, lower the volume by nu
         new_vol = current_vol - nu
-#         print('ref smaller')
+        print('ref smaller')
     
     elif difference > v_threshold: # reference mic is greater than error mic, then increase the volume by nu
         new_vol = current_vol + nu
-#         print('error smaller')
+        print('error smaller')
 
     return new_vol
 
 # Getting Raspi's current speaker volume
 def set_volume(volume=20):
     # Set the current volume to a percentage. default is 20%
-        
-    if volume > 0 and volume <= 70: # 70 might be the loudest and still not disturbing. Need to check!
+    # limiting the output volume to an appropriate volume
+    
+    if volume > 0 and volume <= 50: # 70 might be the loudest and still not disturbing. Need to CHECK!
         call(["amixer", "-D", "pulse", "sset", "Master", str(volume)+"%"])
     
-    else:
-        volume = 0 # temporary conditions
-
+    elif volume > 50:
+        volume = 10 # temporary conditions must be greater than 0
+        call(["amixer", "-D", "pulse", "sset", "Master", str(volume)+"%"])
+    elif volume < 0:
+        volume = 1
+        call(["amixer", "-D", "pulse", "sset", "Master", str(volume)+"%"])
+        
+        
 # Third Thread for simultaneous volume modulation
 def main_volume_modulation(q3, q4, W=10):
     # Need to stop modulation when mic stopped running!
@@ -215,7 +232,7 @@ def main_volume_modulation(q3, q4, W=10):
     RATE = 48000             # 48kHz
     FRAMES_PER_BUFFER = 1024
     set_volume(10)
-    current_volume = 0 # initializes current volume
+    current_volume = 10 # initializes current volume
     
     while True:
     
@@ -225,8 +242,9 @@ def main_volume_modulation(q3, q4, W=10):
         
         if getQ3 == "Stop" and getQ4 == "Stop":
                 break
+        
         difference = getQ3 - getQ4    
-        new_volume = comparator(difference, current_volume, W)
+        new_volume = comparator(difference, current_volume, W, nu=1, v_threshold=100)
         set_volume(new_volume)
         current_volume = new_volume # set the "current_volume" in modulating_volume function into new_volume because we always get 21, 19, 20
     
@@ -279,14 +297,23 @@ def whitenoise(duration=4):
 def thread_mask():    
     
     print('Start')
-    period = 10
+    p = pyaudio.PyAudio()
+    
+#     # Making sure all devices are recognized first
+#     d = device_check()
+#     while len(d)<13:
+#         time.sleep(1)
+#         d = device_check()
+#
+    device_check()
+    period = 60
     window = 10
     q1 = mp.Queue()
     q2 = mp.Queue()
     q3 = mp.Queue()
     q4 = mp.Queue()
 
-    p1 = mp.Process(target=Multithread_mic, args=(q1,q2,period))
+    p1 = mp.Process(target=Multithread_mic, args=(p,q1,q2,period))
     p2 = mp.Process(target=whitenoise, args=(period,))
     p3 = mp.Process(target=Moving_Average, args=(q1, q2, q3, q4, window))
     p4 = mp.Process(target=main_volume_modulation, args = (q3,q4, window))
@@ -299,8 +326,8 @@ def thread_mask():
     p1.join()
     p2.join()
     p3.join()
-    p4.terminate()  # make volume modulation stop when other three processes stopped
-            
+    p4.terminate() # make volume modulation process stop when whitenoise and mic stop running
+    
     print('End')
 
 #######################################################################################################
