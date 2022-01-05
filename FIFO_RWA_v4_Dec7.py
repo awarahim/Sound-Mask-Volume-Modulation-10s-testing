@@ -55,9 +55,6 @@ def ref_mic(p, q1, duration):
 
         # stop stream
         stream2.stop_stream()
-        
-        if stopping == 'a':
-            STOP = True
       
     
     stream2.close()
@@ -67,6 +64,8 @@ def ref_mic(p, q1, duration):
 #    q1.put("Stop")
     
 def error_mic(p, q2, duration):
+    global STOP
+    
     def callback2(in_data2, frame_count2, time_info2, status2):
             data2 = rms(in_data2)
             q2.put(data2)
@@ -92,8 +91,6 @@ def error_mic(p, q2, duration):
         # stop stream
         stream.stop_stream()
         
-        if stopping == 'a':
-            STOP = True
     
     stream.close()
 #     p.terminate()
@@ -167,7 +164,7 @@ def Moving_Average(q1, q2, q3, q4, window= 10):
             getQ1 = q1.get()
             getQ2 = q2.get()
             
-            if stopping == 'a':
+            if STOP == True:
                 break
 
             # Calculate next one step window of the data
@@ -184,8 +181,8 @@ def Moving_Average(q1, q2, q3, q4, window= 10):
             q4.put(Mprev_err)
         
         print('Im out')
-        # Stopping signal for volume modulation thread
-        if stopping == 'a':
+        # stopping signal for volume modulation thread
+        if STOP == True:
             break    
     print('Moving Average Stopped')
 #####################################################################################################################
@@ -233,6 +230,8 @@ def set_volume(volume=20):
         
 # Third Thread for simultaneous volume modulation
 def main_volume_modulation(q3, q4, W=10):
+    global STOP
+    
     # Need to stop modulation when mic stopped running!
     time.sleep(1) # wait for moving average to start
     
@@ -250,9 +249,6 @@ def main_volume_modulation(q3, q4, W=10):
         getQ4 = q4.get()
         print("vol_mod:",getQ3, getQ4)
         
-        if stopping == 'a':
-           STOP = True
-        
         difference = getQ3 - getQ4    
         new_volume = comparator(difference, current_volume, W, nu=1, v_threshold=100)
         set_volume(new_volume)
@@ -264,7 +260,7 @@ def main_volume_modulation(q3, q4, W=10):
 # Generating White Noise, y(n)
 # BLOCKING MODE    
 def whitenoise(duration=4):
-    
+    global STOP
     ##### minimum needed to read a wave #############################
     # open the file for reading.
     wf = wave.open('BrownNoise_60s.wav', 'rb')
@@ -288,8 +284,6 @@ def whitenoise(duration=4):
         stream3.write(data)
         data = wf.readframes(FRAMES_PER_BUFFER)
         
-        if stopping == 'a':
-            STOP = True
     
     # stop stream
     stream3.stop_stream()
@@ -302,9 +296,14 @@ def whitenoise(duration=4):
     p2.terminate()
     
 ###########################################################################################
-def signal_handler(STOP):
+def signal_handler():
+    global STOP
+    
     while STOP==False:
-        stopping = str(input('\n\n-----------------\nEnter a to stop'))
+        stopping = str(input('\n\n-----------------\nEnter a to stop: '))
+        if stopping == 'a':
+            STOP = True
+            break
 ############################# Main code ###################################################
 def thread_mask():    
     print('Start')
@@ -318,7 +317,7 @@ def thread_mask():
 #
     
     device_check()
-    period = 60
+    period = 10
     window = 10
     q1 = mp.Queue()
     q2 = mp.Queue()
