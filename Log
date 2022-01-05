@@ -1,0 +1,1015 @@
+Set period = 120s
+window = 10
+Time elapsed for audio being played: ~1 mins
+Time elapsed for volume being modulated:  ~7 mins
+Conclusion: do blocking mode for whitenoise
+########################################################
+LOG: 
+
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 68.82412017337323 76.7970260126288
+volume difference:  -7.972905839255574
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 66.6417081560359 74.91732341136593
+volume difference:  -8.275615255330024
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 66.97753734043232 85.32559107022934
+volume difference:  -18.348053729797016
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 69.57978360638909 92.3930319632064
+volume difference:  -22.81324835681731
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 74.12180524575018 99.25372876688576
+volume difference:  -25.131923521135576
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 73.10962472117517 98.72835589019718
+volume difference:  -25.618731169022013
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 72.59866224905765 93.95552030117746
+volume difference:  -21.356858052119804
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 70.93879602415188 92.85996827105971
+volume difference:  -21.92117224690783
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 69.24491642173669 91.97397144395374
+volume difference:  -22.729055022217054
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 68.72042477956302 86.27657429955838
+volume difference:  -17.55614951999536
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 69.64838230160672 82.34891686960253
+volume difference:  -12.700534567995817
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 67.38354407144604 77.51402518264229
+volume difference:  -10.130481111196247
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 68.14518966430144 74.86262266437805
+volume difference:  -6.7174330000766105
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 67.3306706978713 73.27636039794025
+volume difference:  -5.945689700068954
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 65.29760362808418 72.04872435814623
+volume difference:  -6.7511207300620555
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 71.16784326527576 70.84385192233161
+volume difference:  0.3239913429441543
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 76.35105893874818 67.65946673009844
+volume difference:  8.691592208649737
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 83.81595304487337 64.4935200570886
+volume difference:  19.322432987784765
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 89.23435774038603 61.94416805137974
+volume difference:  27.29018968900629
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 89.81092196634742 61.44975124624177
+volume difference:  28.361170720105655
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 88.02982976971268 61.70477612161759
+volume difference:  26.325053648095086
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 87.52684679274141 63.73429850945583
+volume difference:  23.792548283285576
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 83.57416211346727 64.06086865851024
+volume difference:  19.513293454957022
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 80.71674590212054 62.95478179265922
+volume difference:  17.761964109461317
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 78.84507131190848 62.859303613393294
+volume difference:  15.98576769851519
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 77.16056418071764 64.47337325205396
+volume difference:  12.687190928663682
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 78.84450776264588 68.52603592684856
+volume difference:  10.318471835797311
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 77.8600569863813 71.57343233416371
+volume difference:  6.286624652217583
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 79.37405128774317 76.41608910074734
+volume difference:  2.957962186995829
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 80.73664615896885 82.47448019067261
+volume difference:  -1.7378340317037555
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 82.76298154307197 85.12703217160535
+volume difference:  -2.364050628533377
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 79.98668338876477 84.41432895444481
+volume difference:  -4.427645565680038
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 77.9880150498883 83.47289605900033
+volume difference:  -5.48488100911203
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 79.98921354489947 81.3256064531003
+volume difference:  -1.3363929082008354
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 80.29029219040953 78.29304580779028
+volume difference:  1.9972463826192524
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 80.66126297136857 75.16374122701126
+volume difference:  5.497521744357314
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 84.29513667423171 74.24736710431013
+volume difference:  10.047769569921584
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 89.36562300680855 73.32263039387911
+volume difference:  16.04299261292944
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 90.62906070612769 70.9903673544912
+volume difference:  19.63869335163649
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 93.36615463551492 68.09133061904208
+volume difference:  25.274824016472834
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 93.52953917196342 66.68219755713787
+volume difference:  26.847341614825552
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 96.27658525476708 65.81397780142409
+volume difference:  30.462607453342997
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 94.74892672929037 67.73258002128168
+volume difference:  27.016346708008697
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 96.67403405636134 66.9593220191535
+volume difference:  29.714712037207832
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 96.8066306507252 65.76338981723815
+volume difference:  31.043240833487047
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 98.92596758565267 64.68705083551433
+volume difference:  34.238916750138344
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 102.4333708270874 65.8183457519629
+volume difference:  36.61502507512451
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 105.49003374437866 65.23651117676661
+volume difference:  40.25352256761205
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 105.5410303699408 65.01286005908995
+volume difference:  40.528170310850854
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 103.08692733294671 65.01157405318095
+volume difference:  38.075353279765764
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 101.97823459965204 63.610416647862856
+volume difference:  38.367817951789185
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 97.88041113968684 62.14937498307657
+volume difference:  35.73103615661027
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 106.29237002571816 61.33443748476891
+volume difference:  44.957932540949244
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 114.56313302314634 63.60099373629202
+volume difference:  50.96213928685432
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 122.10681972083171 66.84089436266282
+volume difference:  55.265925358168886
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 126.69613774874854 67.95680492639654
+volume difference:  58.739332822352
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 127.42652397387369 67.6611244337569
+volume difference:  59.76539954011679
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 122.18387157648631 66.6950119903812
+volume difference:  55.48885958610511
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 113.66548441883768 69.32551079134308
+volume difference:  44.3399736274946
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 109.1989359769539 69.49295971220877
+volume difference:  39.70597626474513
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 106.07904237925851 71.0436637409879
+volume difference:  35.035378638270615
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 102.87113814133266 72.63929736688911
+volume difference:  30.231840774443555
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 102.0840243271994 71.4753676302002
+volume difference:  30.608656696999205
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 97.87562189447947 74.22783086718017
+volume difference:  23.64779102729929
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 95.38805970503152 76.50504778046215
+volume difference:  18.883011924569374
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 96.44925373452837 78.75454300241593
+volume difference:  17.69471073211244
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 94.00432836107554 80.27908870217433
+volume difference:  13.725239658901202
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 93.70389552496798 84.0511798319569
+volume difference:  9.652715693011075
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 89.83350597247117 87.04606184876121
+volume difference:  2.7874441237099603
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 86.35015537522406 88.84145566388509
+volume difference:  -2.491300288661023
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 85.31513983770165 87.05731009749658
+volume difference:  -1.742170259794932
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 86.98362585393149 85.35157908774693
+volume difference:  1.6320467661845584
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 87.18526326853834 82.91642117897223
+volume difference:  4.268842089566107
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 85.4667369416845 79.924779061075
+volume difference:  5.541957880609502
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 85.02006324751605 76.9323011549675
+volume difference:  8.087762092548545
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 83.11805692276444 73.63907103947075
+volume difference:  9.478985883293689
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 86.406251230488 75.17516393552367
+volume difference:  11.231087294964325
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 94.2656261074392 75.25764754197131
+volume difference:  19.007978565467894
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 102.73906349669528 72.33188278777418
+volume difference:  30.407180708921103
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 107.46515714702575 67.79869450899676
+volume difference:  39.66646263802899
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 110.01864143232318 66.21882505809708
+volume difference:  43.7998163742261
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 111.01677728909087 62.59694255228737
+volume difference:  48.419834736803494
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 107.61509956018178 59.237248297058635
+volume difference:  48.37785126312314
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 103.4535896041636 57.01352346735277
+volume difference:  46.44006613681083
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 98.40823064374723 54.71217112061749
+volume difference:  43.69605952312974
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 93.9674075793725 55.540954008555744
+volume difference:  38.42645357081676
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 89.97066682143526 56.98685860770017
+volume difference:  32.98380821373509
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 88.87360013929174 58.88817274693015
+volume difference:  29.985427392361586
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 88.88624012536256 61.19935547223714
+volume difference:  27.686884653125425
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 87.69761611282631 61.37941992501342
+volume difference:  26.318196187812887
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 85.02785450154369 63.74147793251208
+volume difference:  21.286376569031603
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 85.62506905138932 67.86733013926087
+volume difference:  17.757738912128445
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 85.76256214625039 73.38059712533479
+volume difference:  12.381965020915601
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 87.48630593162535 74.44253741280131
+volume difference:  13.043768518824038
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 88.53767533846282 75.49828367152118
+volume difference:  13.03939166694164
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 85.08390780461653 76.14845530436907
+volume difference:  8.935452500247465
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 85.27551702415488 74.93360977393216
+volume difference:  10.341907250222718
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 87.14796532173939 75.84024879653894
+volume difference:  11.307716525200448
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 88.53316878956545 76.25622391688505
+volume difference:  12.276944872680403
+same baseline 2689
+Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+vol_mod: 86.9798519106089 78.43060152519655
+volume difference:  8.54925038541235
+same baseline 2689
+End
+>>> Simple mixer control 'Master',0
+  Capabilities: pvolume pswitch pswitch-joined
+  Playback channels: Front Left - Front Right
+  Limits: Playback 0 - 65536
+  Mono:
+  Front Left: Playback 6554 [10%] [on]
+  Front Right: Playback 6554 [10%] [on]
+
