@@ -18,7 +18,11 @@ from subprocess import call
 FORMAT  = pyaudio.paInt16    # 24-bit the mic is 24-bit with sample rate of 96kHz
 CHANNELS = 2                 # number of audio streams to use. Since there is one speaker and one mic, use 2 streams
 RATE = 48000                # 48kHz since mic is specific at 48kHz
-FRAMES_PER_BUFFER = 1024    # 
+FRAMES_PER_BUFFER = 1024    #
+
+# Stopping functions for testings
+STOP = False
+
 
 # calculate RMS of data chunk
 def rms(data):
@@ -187,44 +191,37 @@ def comparator(difference, current_vol, window=10, nu=1, v_threshold=100):
     
     #initialize new volume
     new_vol = current_vol
-    print("volume difference: ",difference)
+#     print("volume difference: ",difference)
     
     # if the difference is within [-100, 100] don't change volume
     if difference >= -v_threshold and difference <= v_threshold:
        new_vol = current_vol
        
-       print('same baseline', new_vol)
+#        print('same baseline', new_vol)
     
     elif difference < -v_threshold: # reference mic has smaller volume than error mic, lower the volume by nu
         new_vol = current_vol - nu
-        print('ref smaller')
+#         print('ref smaller')
     
     elif difference > v_threshold: # reference mic is greater than error mic, then increase the volume by nu
         new_vol = current_vol + nu
-        print('error smaller')
+#         print('error smaller')
 
     return new_vol
 
 # Getting Raspi's current speaker volume
 def set_volume(volume=20):
     # Set the current volume to a percentage. default is 20%
-    # limiting the output volume to an appropriate volume
     
-    if volume > 0 and volume <= 50: # 70 might be the loudest and still not disturbing. Need to CHECK!
-        call(["amixer", "-D", "pulse", "sset", "Master", str(volume)+"%"])
+    call(["amixer", "-D", "pulse", "sset", "Master", str(volume)+"%"])
     
-    elif volume > 50:
-        volume = 10 # temporary conditions must be greater than 0
-        call(["amixer", "-D", "pulse", "sset", "Master", str(volume)+"%"])
-    elif volume < 0:
-        volume = 1
-        call(["amixer", "-D", "pulse", "sset", "Master", str(volume)+"%"])
+    
         
         
 # Third Thread for simultaneous volume modulation
 def main_volume_modulation(q3, q4, W=10):
     # Need to stop modulation when mic stopped running!
-    time.sleep(1) # wait for moving average to start
+    time.sleep(0.2) # wait for moving average to start
     
     print('volume modulation started')
     
@@ -238,7 +235,7 @@ def main_volume_modulation(q3, q4, W=10):
     
         getQ3 = q3.get()
         getQ4 = q4.get()
-        print("vol_mod:",getQ3, getQ4)
+#         print("vol_mod:",getQ3, getQ4)
         
         if getQ3 == "Stop" and getQ4 == "Stop":
                 break
@@ -275,7 +272,7 @@ def whitenoise(duration=4):
                     stream_callback=callback_speaker)
     # start stream
     stream3.start_stream()
-    print("speaker playing")
+#     print("speaker playing")
     
     # control how long the stream to play
     time.sleep(duration)
@@ -284,7 +281,7 @@ def whitenoise(duration=4):
     stream3.stop_stream()
 
         
-    print('speaker stopped')    
+#     print('speaker stopped')    
     # cleanup stuff
     stream3.close()
     wf.close()
@@ -297,36 +294,38 @@ def whitenoise(duration=4):
 def thread_mask():    
     
     print('Start')
-    p = pyaudio.PyAudio()
-    
-#     # Making sure all devices are recognized first
-#     d = device_check()
-#     while len(d)<13:
-#         time.sleep(1)
-#         d = device_check()
-#
-    device_check()
-    period = 60
-    window = 10
-    q1 = mp.Queue()
-    q2 = mp.Queue()
-    q3 = mp.Queue()
-    q4 = mp.Queue()
+    while True:
+        stopping = str(input("Enter False or True:"))
+        p = pyaudio.PyAudio()
+        
+    #     # Making sure all devices are recognized first
+    #     d = device_check()
+    #     while len(d)<13:
+    #         time.sleep(1)
+    #         d = device_check()
+    #
+        device_check()
+        period = 60
+        window = 10
+        q1 = mp.Queue()
+        q2 = mp.Queue()
+        q3 = mp.Queue()
+        q4 = mp.Queue()
 
-    p1 = mp.Process(target=Multithread_mic, args=(p,q1,q2,period))
-    p2 = mp.Process(target=whitenoise, args=(period,))
-    p3 = mp.Process(target=Moving_Average, args=(q1, q2, q3, q4, window))
-    p4 = mp.Process(target=main_volume_modulation, args = (q3,q4, window))
-    
-    p1.start()
-    p2.start()
-    p3.start()
-    p4.start()
-    
-    p1.join()
-    p2.join()
-    p3.join()
-    p4.terminate() # make volume modulation process stop when whitenoise and mic stop running
+        p1 = mp.Process(target=Multithread_mic, args=(p,q1,q2,period))
+        p2 = mp.Process(target=whitenoise, args=(period,))
+        p3 = mp.Process(target=Moving_Average, args=(q1, q2, q3, q4, window))
+        p4 = mp.Process(target=main_volume_modulation, args = (q3,q4, window))
+        
+        p1.start()
+        p2.start()
+        p3.start()
+        p4.start()
+        
+        p1.join()
+        p2.join()
+        p3.join()
+        p4.terminate() # make volume modulation process stop when whitenoise and mic stop running
     
     print('End')
 
