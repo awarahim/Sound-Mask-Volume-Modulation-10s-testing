@@ -32,7 +32,7 @@ def rms(data):
     rms = np.sqrt(np.mean(d**2))
     return int(rms)
 
-def ref_mic(p, q1, duration, stop_event):   
+def ref_mic(p, q1, stop_event):   
     
     def callback(in_data, frame_count, time_info, status):
             data = rms(in_data)
@@ -53,12 +53,12 @@ def ref_mic(p, q1, duration, stop_event):
         # start stream
         stream2.start_stream()
 
-        # control how long the stream to record
-        time.sleep(duration)
+    # control how long the stream to record
+    # time.sleep(duration)
 
-        # stop stream
-        stream2.stop_stream()
-      
+    # stop stream
+    stream2.stop_stream()
+
     
     stream2.close()
 #     p.terminate()
@@ -66,7 +66,7 @@ def ref_mic(p, q1, duration, stop_event):
     # Send signal it stopped recording
 #    q1.put("Stop")
     
-def error_mic(p, q2, duration, stop_event):
+def error_mic(p, q2, stop_event):
     
     def callback2(in_data2, frame_count2, time_info2, status2):
             data2 = rms(in_data2)
@@ -87,11 +87,11 @@ def error_mic(p, q2, duration, stop_event):
         # start stream
         stream.start_stream()
 
-        # control how long the stream to record
-        time.sleep(duration)
+    # control how long the stream to record
+    #time.sleep(duration)
 
-        # stop stream
-        stream.stop_stream()
+    # stop stream
+    stream.stop_stream()
         
     
     stream.close()
@@ -109,10 +109,10 @@ def device_check():
     
     return devices
 
-def Multithread_mic(p,q1, q2, duration, stop_event):
+def Multithread_mic(p,q1, q2, stop_event):
 
-    t1 = threading.Thread(target=ref_mic, args=(p,q1,duration,stop_event))
-    t2 = threading.Thread(target=error_mic, args=(p,q2, duration, stop_event))
+    t1 = threading.Thread(target=ref_mic, args=(p,q1,stop_event))
+    t2 = threading.Thread(target=error_mic, args=(p,q2,stop_event))
     
     t1.start()
     t2.start()
@@ -256,7 +256,7 @@ def main_volume_modulation(q3, q4, stop_event, W=10):
 ################################################################################################################################################    
 # Generating White Noise, y(n)
 # BLOCKING MODE    
-def whitenoise(stop_event, duration=4):
+def whitenoise(stop_event):
    
     ##### minimum needed to read a wave #############################
     # open the file for reading.
@@ -280,18 +280,20 @@ def whitenoise(stop_event, duration=4):
     while not stop_event.wait(0.5):
         stream3.write(data)
         data = wf.readframes(FRAMES_PER_BUFFER)
-        
+        if data == b'' : # If file is over then rewind.
+            wf.rewind()
+            data = wf.readframes(FRAMES_PER_BUFFER)
     
-    # stop stream
-    stream3.stop_stream()
+    
 
     print('speaker stopped')    
     # cleanup stuff
     stream3.close()
-    wf.close()
+    
     # close PyAudio
     p2.terminate()
     
+    wf.close()
 ###########################################################################################
 def stop(signum, frame):
     global stop_event
@@ -326,8 +328,8 @@ def thread_mask():
     q3 = mp.Queue()
     q4 = mp.Queue()
 
-    p1 = mp.Process(target=Multithread_mic, args=(p,q1,q2,period,stop_event))
-    p2 = mp.Process(target=whitenoise, args=(stop_event,period))
+    p1 = mp.Process(target=Multithread_mic, args=(p,q1,q2,stop_event))
+    p2 = mp.Process(target=whitenoise, args=(stop_event))
     p3 = mp.Process(target=Moving_Average, args=(q1, q2, q3, q4, stop_event, window))
     p4 = mp.Process(target=main_volume_modulation, args = (q3,q4, stop_event, window))
     
