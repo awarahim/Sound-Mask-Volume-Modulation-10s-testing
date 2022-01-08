@@ -22,7 +22,7 @@ FORMAT  = pyaudio.paInt16    # 24-bit the mic is 24-bit with sample rate of 96kH
 CHANNELS = 2                 # number of audio streams to use. Since there is one speaker and one mic, use 2 streams
 RATE = 48000                # 48kHz since mic is specific at 48kHz
 FRAMES_PER_BUFFER = 1024    # 
-STOP = False
+
 
 # calculate RMS of data chunk
 def rms(data):
