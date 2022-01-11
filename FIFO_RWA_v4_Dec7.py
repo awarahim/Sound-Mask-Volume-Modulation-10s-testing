@@ -49,9 +49,10 @@ def ref_mic(p, q1, stop_event):
         input_device_index=3,
         stream_callback = callback)
     
-    while not stop_event.wait(0.5):
+    while not stop_event.wait(0):
         # start stream
         stream2.start_stream()
+        
 
     # control how long the stream to record
     # time.sleep(duration)
@@ -162,7 +163,7 @@ def Moving_Average(q1, q2, q3, q4, stop_event, window= 10):
         
         
         while not stop_event.wait(0.5):
-#             print(q1.qsize(),q2.qsize())
+            print(q1.qsize(),q2.qsize())
             
             getQ1 = q1.get()
             getQ2 = q2.get()
@@ -215,22 +216,14 @@ def set_volume(volume=20):
     # Set the current volume to a percentage. default is 20%
     # limiting the output volume to an appropriate volume
     
-    if volume > 0 and volume <= 50: # 70 might be the loudest and still not disturbing. Need to CHECK!
-        call(["amixer", "-D", "pulse", "sset", "Master", str(volume)+"%"])
-    
-    elif volume > 50:
-        volume = 10 # temporary conditions must be greater than 0
-        call(["amixer", "-D", "pulse", "sset", "Master", str(volume)+"%"])
-    elif volume < 0:
-        volume = 1
-        call(["amixer", "-D", "pulse", "sset", "Master", str(volume)+"%"])
+    call(["amixer", "-D", "pulse", "sset", "Master", str(volume)+"%"])
         
         
 # Third Thread for simultaneous volume modulation
 def main_volume_modulation(q3, q4, stop_event, W=10):
-    
     # Need to stop modulation when mic stopped running!
-    time.sleep(1) # wait for moving average to start
+    
+    time.sleep(3) # wait for moving average to complete calculate and put data into q3 and q4
     
     print('volume modulation started')
     
@@ -240,7 +233,7 @@ def main_volume_modulation(q3, q4, stop_event, W=10):
     set_volume(10)
     current_volume = 10 # initializes current volume
     
-    while not stop_event.wait(0.5):
+    while q3.qsize()> 0 and q4.qsize()> 0 and not stop_event.wait(0.5):
     
         getQ3 = q3.get()
         getQ4 = q4.get()
@@ -255,13 +248,18 @@ def main_volume_modulation(q3, q4, stop_event, W=10):
     
 ################################################################################################################################################    
 # Generating White Noise, y(n)
-# BLOCKING MODE    
-def whitenoise(stop_event):
+
+# NONBLOCKING MODE    
+def whitenoise():
    
     ##### minimum needed to read a wave #############################
     # open the file for reading.
     wf = wave.open('BrownNoise_60s.wav', 'rb')
-        
+    
+    def callback_speaker(in_data, frame_count, time_info, status):
+        data = wf.readframes(frame_count)
+        return data, pyaudio.paContinue
+    
     #create an audio object
     p2 = pyaudio.PyAudio()
     
@@ -270,22 +268,22 @@ def whitenoise(stop_event):
                     channels = wf.getnchannels(),
                     rate = wf.getframerate(),
                     output=True,
-                    output_device_index=1)
-    # read data
-    data = wf.readframes(FRAMES_PER_BUFFER)
+                    output_device_index=1,
+                    stream_callback=callback_speaker)
     
+    
+    # start stream
+    stream3.start_stream()
     print("speaker playing")
-    # play stream
     
-    while not stop_event.wait(0.5):
-        stream3.write(data)
-        data = wf.readframes(FRAMES_PER_BUFFER)
-        if data == b'' : # If file is over then rewind.
-            wf.rewind()
-            data = wf.readframes(FRAMES_PER_BUFFER)
-    
-    
-
+    # control how long the stream to play
+    time.sleep(60)
+        
+        # stop stream
+        
+    stream3.stop_stream()
+#         wf.rewind()
+        
     print('speaker stopped')    
     # cleanup stuff
     stream3.close()
@@ -294,6 +292,10 @@ def whitenoise(stop_event):
     p2.terminate()
     
     wf.close()
+    
+def loop_play(stop_event):
+    while not stop_event.wait(0):
+        whitenoise()
 ###########################################################################################
 def stop(signum, frame):
     global stop_event
@@ -329,7 +331,7 @@ def thread_mask():
     q4 = mp.Queue()
 
     p1 = mp.Process(target=Multithread_mic, args=(p,q1,q2,stop_event))
-    p2 = mp.Process(target=whitenoise, args=(stop_event))
+    p2 = mp.Process(target=loop_play, args=(stop_event,))
     p3 = mp.Process(target=Moving_Average, args=(q1, q2, q3, q4, stop_event, window))
     p4 = mp.Process(target=main_volume_modulation, args = (q3,q4, stop_event, window))
     
@@ -343,7 +345,7 @@ def thread_mask():
     p1.join()
     p2.join()
     p3.join()
-    p4.join() # make volume modulation process stop when whitenoise and mic stop running
+    p4.join() 
     
     
     print('End')
@@ -444,3 +446,9 @@ if __name__ == '__main__':
 
 # 01/06/2022
 # Stop signal is handled, not yet tested
+
+#01/11/2022
+# stop signal worked for all processes, just need to wait for the 1mins whitenoise finish playing then it will be done
+# loop playing whitenoise using additional thread is needed. There is no way blocking or non-blocking mode can rewind and play
+# infinitely without defining how long it should play
+# the system and speaker volume are not in sync.
