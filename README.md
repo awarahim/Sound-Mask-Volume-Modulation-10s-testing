@@ -20,3 +20,4 @@ edited the line : "set-default-sink output" to "set-default-sink 1"
 result: did nothing
 
 Probably I need to search for "how to control volume with pyaudio"
+https://stackoverflow.com/questions/25868428/pyaudio-how-to-check-volume
