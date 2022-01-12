@@ -9,7 +9,7 @@ What you need:
 2. 1 set of speaker with 3.5mm audio jack
 3. Raspberry Pi 4B+
 
-Successed in looping the sound
+Successed in looping the sound. refered: https://stackoverflow.com/questions/47513950/how-to-loop-play-an-audio-with-pyaudio (first solution)
 
 01/12/2022
 Problem: Volume changing does not happen. System volume changed but not the output of the speaker
