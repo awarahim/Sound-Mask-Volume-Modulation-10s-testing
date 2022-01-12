@@ -14,7 +14,7 @@ import numpy as np
 import time
 from subprocess import call
 
-# Stop signal handler
+# Stop signal handler by Ctrl-C
 stop_event = mp.Event()
 
 # Constants for audio devices
@@ -84,7 +84,7 @@ def error_mic(p, q2, stop_event):
         input_device_index=2,
         stream_callback = callback2)
     
-    while not stop_event.wait(0.5):
+    while not stop_event.wait(0):
         # start stream
         stream.start_stream()
 
@@ -230,14 +230,15 @@ def main_volume_modulation(q3, q4, stop_event, W=10):
 #     start = time.time()
     RATE = 48000             # 48kHz
     FRAMES_PER_BUFFER = 1024
-    set_volume(10)
+    
     current_volume = 10 # initializes current volume
+    set_volume(current_volume)
     
     while q3.qsize()> 0 and q4.qsize()> 0 and not stop_event.wait(0.5):
     
         getQ3 = q3.get()
         getQ4 = q4.get()
-        print("vol_mod:",getQ3, getQ4)
+#         print("vol_mod:",getQ3, getQ4)
         
         difference = getQ3 - getQ4    
         new_volume = comparator(difference, current_volume, W, nu=1, v_threshold=100)
