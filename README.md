@@ -9,6 +9,14 @@ What you need:
 2. 1 set of speaker with 3.5mm audio jack
 3. Raspberry Pi 4B+
 
+Successed in looping the sound
 
+01/12/2022
+Problem: Volume changing does not happen. System volume changed but not the output of the speaker
+reference: https://raspberrypi.stackexchange.com/questions/112954/how-to-restore-audio-output-after-updating-raspbian-buster-on-pi4
+this might due to update of the raspberry pi
+> sudo nano /etc/pulse/default.pa
+edited the line : "set-default-sink output" to "set-default-sink 1"
+result: did nothing
 
-This version made the sound choppy
+Probably I need to search for "how to control volume with pyaudio"
