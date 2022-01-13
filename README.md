@@ -21,3 +21,4 @@ result: did nothing
 
 Probably I need to search for "how to control volume with pyaudio"
 https://stackoverflow.com/questions/25868428/pyaudio-how-to-check-volume
+https://stackoverflow.com/questions/36664121/modify-volume-while-streaming-with-pyaudio
