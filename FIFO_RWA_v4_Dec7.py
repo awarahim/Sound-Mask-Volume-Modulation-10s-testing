@@ -77,9 +77,9 @@ def whitenoise_block(CHUNK=1024, volume):
     # play stream (3)
     while len(data) > 0:
         stream3.write(data)
-        data = wf.readframes(CHUNK)
+        #data = wf.readframes(CHUNK)
         data = set_volume(data,volume) # could make this part calculate while the stream is playing the audio using threading/multiprocessing
-        
+        data = wf.readframes(CHUNK)
 
     # stop stream (4)
     stream3.stop_stream()
