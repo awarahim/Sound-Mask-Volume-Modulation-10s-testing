@@ -185,6 +185,29 @@ def Moving_Average(q1, q2, q3, q4, stop_event, window= 10):
   
     print('Moving Average Stopped')
 #####################################################################################################################
+# Third Thread for simultaneous volume modulation
+def main_volume_modulation(q3, q4, q5, stop_event, W=10):
+ 
+    time.sleep(3) # wait for moving average to complete calculate and put data into q3 and q4
+    
+    print('volume modulation started')
+    
+    current_volume = 10 # initializes current volume
+    q5.put(current_volume)
+    
+    while q3.qsize()> 0 and q4.qsize()> 0 and not stop_event.wait(0.5):
+    
+        getQ3 = q3.get()
+        getQ4 = q4.get()
+        
+        difference = getQ3 - getQ4    
+        new_volume = comparator(difference, current_volume, W, nu=1, v_threshold=100)
+        #set_volume(new_volume)
+        q5.put(new_volume)
+        current_volume = new_volume # set the "current_volume" in modulating_volume function into new_volume because we always get 21, 19, 20
+    
+    print('volume modulation stopped')
+    
 def comparator(difference, current_vol, window=10, nu=1, v_threshold=100):
     # nu : the step size of volume being increased or decreased, in percent, ex: 1 = 1%
     # v_threshold : upper limit of the difference between the mics values
@@ -210,102 +233,53 @@ def comparator(difference, current_vol, window=10, nu=1, v_threshold=100):
         print('error smaller')
 
     return new_vol
-
-# # Getting Raspi's current speaker volume
-# def set_volume(volume=20):
-#     # Set the current volume to a percentage. default is 20%
-#     # limiting the output volume to an appropriate volume
-#     
-#     call(["amixer", "-D", "pulse", "sset", "Master", str(volume)+"%"])
-  
-def set_volume(datalist,volume):
-    """ Change value of list of audio chunks """
-    sound_level = (volume / 100.)
-        
-    fromType = np.int16
-    chunk = np.frombuffer(datalist,fromType).astype(np.float) 
-
-    chunk = chunk * sound_level
-    print(chunk)
-    
-    datalist = chunk.astype(np.int16)
-    print(datalist)
-        
-    return datalist
-    
-        
-        
-# Third Thread for simultaneous volume modulation
-def main_volume_modulation(q3, q4, q5, stop_event, W=10):
- 
-    time.sleep(3) # wait for moving average to complete calculate and put data into q3 and q4
-    
-    print('volume modulation started')
-    
-    current_volume = 10 # initializes current volume
-    q5.put(current_volume)
-    
-    while q3.qsize()> 0 and q4.qsize()> 0 and not stop_event.wait(0.5):
-    
-        getQ3 = q3.get()
-        getQ4 = q4.get()
-        
-        difference = getQ3 - getQ4    
-        new_volume = comparator(difference, current_volume, W, nu=1, v_threshold=100)
-        #set_volume(new_volume)
-        q5.put(new_volume)
-        current_volume = new_volume # set the "current_volume" in modulating_volume function into new_volume because we always get 21, 19, 20
-    
-    print('volume modulation stopped')
-    
 ################################################################################################################################################    
 # Generating White Noise, y(n)
 
 # NONBLOCKING MODE    
-# def whitenoise(q5,):
-#    
-#     ##### minimum needed to read a wave #############################
-#     # open the file for reading.
-#     wf = wave.open('BrownNoise_60s.wav', 'rb')
+def whitenoise(q5):
+    
+     ##### minimum needed to read a wave #############################
+     # open the file for reading.
+    wf = wave.open('BrownNoise_60s.wav', 'rb')
+     
+    def callback_speaker(in_data, frame_count, time_info, status):
+         data = wf.readframes(frame_count)
+         data = set_volume(data,q5.get())
+         return data, pyaudio.paContinue
+     
+     #create an audio object
+    p2 = pyaudio.PyAudio()
+     
+     # open stream based on the wave object which has been input
+    stream3 = p2.open(format=p2.get_format_from_width(wf.getsampwidth()),
+                     channels = wf.getnchannels(),
+                     rate = wf.getframerate(),
+                     output=True,
+                     output_device_index=1,
+                     stream_callback=callback_speaker)
 #     
-#     def callback_speaker(in_data, frame_count, time_info, status):
-#         data = wf.readframes(frame_count)
-#         data = set_volume(in_data,q5.get())
-        data =
-#         return data, pyaudio.paContinue
 #     
-#     #create an audio object
-#     p2 = pyaudio.PyAudio()
-#     
-#     # open stream based on the wave object which has been input
-#     stream3 = p2.open(format=p2.get_format_from_width(wf.getsampwidth()),
-#                     channels = wf.getnchannels(),
-#                     rate = wf.getframerate(),
-#                     output=True,
-#                     output_device_index=1,
-#                     stream_callback=callback_speaker)
-#     
-#     
-#     # start stream
-#     stream3.start_stream()
-#     print("speaker playing")
-#     
-#     # control how long the stream to play
-#     time.sleep(60)
+     # start stream
+    stream3.start_stream()
+    print("speaker playing")
+     
+     # control how long the stream to play
+    time.sleep(60)
 #         
 #         # stop stream
 #         
-#     stream3.stop_stream()
-# #         wf.rewind()
-#         
-#     print('speaker stopped')    
-#     # cleanup stuff
-#     stream3.close()
+    stream3.stop_stream()
+#         wf.rewind()
+         
+    print('speaker stopped')    
+     # cleanup stuff
+    stream3.close()
 #     
-#     # close PyAudio
-#     p2.terminate()
-#     
-#     wf.close()
+     # close PyAudio
+    p2.terminate()
+     
+    wf.close()
     
 # BLOCKING MODE    
 def whitenoise_block(q5,CHUNK=1024):
@@ -330,9 +304,8 @@ def whitenoise_block(q5,CHUNK=1024):
 
     # play stream (3)
     while len(data) > 0:
-        stream3.write(data)
-        data = wf.readframes(CHUNK)
         data = set_volume(data,q5.get()) # could make this part calculate while the stream is playing the audio using threading/multiprocessing
+        stream3.write(data)
         data = wf.readframes(CHUNK)
 
     # stop stream (4)
@@ -341,10 +314,35 @@ def whitenoise_block(q5,CHUNK=1024):
 
     # close PyAudio (5)
     p2.terminate()
+        
+# # Getting Raspi's current speaker volume
+# def set_volume(volume=20):
+#     # Set the current volume to a percentage. default is 20%
+#     # limiting the output volume to an appropriate volume
+#     
+#     call(["amixer", "-D", "pulse", "sset", "Master", str(volume)+"%"])
+  
+def set_volume(datalist,volume):
+    """ Change value of list of audio chunks """
+    sound_level = (volume / 100.)
+        
+    fromType = np.int16
+    chunk = np.frombuffer(datalist,fromType).astype(np.float) 
+
+    chunk = chunk * sound_level
+    print(chunk)
     
+    datalist = chunk.astype(np.int16)
+    print(datalist)
+        
+    return datalist
+
+
 def loop_play(q5, stop_event):
     while not stop_event.wait(0):
-        whitenoise_block(q5, CHUNK=1024)
+        #whitenoise_block(q5, CHUNK=1024)
+        whitenoise(q5)
+        
 ###########################################################################################
 def stop(signum, frame):
     global stop_event
