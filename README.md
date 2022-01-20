@@ -21,3 +21,6 @@ result: did nothing
 
 Probably I need to search for "how to control volume with pyaudio"
 https://stackoverflow.com/questions/25868428/pyaudio-how-to-check-volume
+
+1/20/2022 UPDATE
+Updated the code to multiply the data bytes of audio file with fraction of volume. See set_volume() function. 
