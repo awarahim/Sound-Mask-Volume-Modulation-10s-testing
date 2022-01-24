@@ -194,7 +194,7 @@ def Moving_Average(q1, q2, q3, q4, stop_event, window= 10):
     
 #####################################################################################################################
 # Third Thread for simultaneous volume modulation
-def main_volume_modulation(q3, q4, q5, volume_value, stop_event, W=10):
+def main_volume_modulation(q3, q4, volume_value, stop_event, W=10):
  
     time.sleep(3) # wait for moving average to complete calculate and put data into q3 and q4
     
@@ -202,7 +202,7 @@ def main_volume_modulation(q3, q4, q5, volume_value, stop_event, W=10):
 #     print('shared volume:', volume_value.value)
     
     current_volume = volume_value.value # initializes current volume
-    q5.put(current_volume)
+    
     
     # cyclical linear ramp from 0 to 100
     while q3.qsize()> 0 and q4.qsize()> 0 and not stop_event.wait(0.5):
@@ -214,8 +214,7 @@ def main_volume_modulation(q3, q4, q5, volume_value, stop_event, W=10):
         
         difference = getQ3 - getQ4    
         volume_value.value = comparator(difference, current_volume, W, nu=1, v_threshold=100)
-        #set_volume(new_volume)
-        q5.put(volume_value.value)
+        
         current_volume = volume_value.value # set the "current_volume" in modulating_volume function into new_volume because we always get 21, 19, 20
     
     print('volume modulation stopped')
@@ -249,7 +248,7 @@ def comparator(difference, current_vol, window=10, nu=1, v_threshold=100):
 # Generating White Noise, y(n)
 
 # NONBLOCKING MODE    
-def whitenoise(q5,volume_value):
+def whitenoise(volume_value):
     
      ##### minimum needed to read a wave #############################
      # open the file for reading.
@@ -314,10 +313,10 @@ def set_volume(datalist,volume):
     return datalist
 
 
-def loop_play(q5, volume_value, stop_event):
+def loop_play(volume_value, stop_event):
     while not stop_event.wait(0):
         #whitenoise_block(q5, CHUNK=1024)
-        whitenoise(q5, volume_value)
+        whitenoise(volume_value)
         
 ###########################################################################################
 def stop(signum, frame):
@@ -352,14 +351,13 @@ def thread_mask():
     q2 = mp.Queue()
     q3 = mp.Queue()
     q4 = mp.Queue()
-    q5 = mp.Queue()
     
     volume_value = mp.Value('d', 10.0)
 
     p1 = mp.Process(target=Multithread_mic, args=(p,q1,q2,stop_event))
-    p2 = mp.Process(target=loop_play, args=(q5,volume_value, stop_event,))
+    p2 = mp.Process(target=loop_play, args=(volume_value, stop_event,))
     p3 = mp.Process(target=Moving_Average, args=(q1, q2, q3, q4, stop_event, window))
-    p4 = mp.Process(target=main_volume_modulation, args = (q3,q4,q5,volume_value, stop_event, window))
+    p4 = mp.Process(target=main_volume_modulation, args = (q3,q4,volume_value, stop_event, window))
     
     
     p1.start()
