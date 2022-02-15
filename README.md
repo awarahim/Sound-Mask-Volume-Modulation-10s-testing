@@ -9,6 +9,12 @@ What you need:
 2. 1 set of speaker with 3.5mm audio jack
 3. Raspberry Pi 4B+
 
+Dependencies: 
+1) Installing Pyaudio in Raspi 4 and Python3: 
+      - in terminal write: sudo apt install python3-pyaudio
+
+
+
 Successed in looping the sound. refered: https://stackoverflow.com/questions/47513950/how-to-loop-play-an-audio-with-pyaudio (first solution)
 
 01/12/2022
