@@ -280,7 +280,7 @@ def whitenoise(volume_value):
     print("speaker playing")
      
      # control how long the stream to play
-    time.sleep(60)
+    time.sleep(10)
 #         
 #         # stop stream
 #         
@@ -486,3 +486,4 @@ if __name__ == '__main__':
 # Test putting the error or reference mic closer to the speaker to see if they will change the volume up/down. Need to test some more
 # print statement on the set_volume() does not stop even when Ctrl-C is clicked. Need to change that! If not, will need to force
 # stop which eventually made the devices lost. Will require reboot.
+
