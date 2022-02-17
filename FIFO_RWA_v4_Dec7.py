@@ -16,6 +16,7 @@ from subprocess import call
 
 # Stop signal handler by Ctrl-C
 stop_event = mp.Event()
+# with SSH it doesnt wokrk :(
 
 # Constants for audio devices
 FORMAT  = pyaudio.paInt16    # 24-bit the mic is 24-bit with sample rate of 96kHz
@@ -213,7 +214,7 @@ def main_volume_modulation(q3, q4, volume_value, stop_event, W=10):
         
 #         volume_value.value = (volume_value.value + 30) % 100
         
-        difference = getQ3 - getQ4    
+        difference = q3.get() - q4.get()  # getQ3 - getQ4    
         volume_value.value = comparator(difference, current_volume, W, nu=1, v_threshold=100)
         
         current_volume = volume_value.value # set the "current_volume" in modulating_volume function into new_volume because we always get 21, 19, 20
@@ -487,4 +488,8 @@ if __name__ == '__main__':
 # Test putting the error or reference mic closer to the speaker to see if they will change the volume up/down. Need to test some more
 # print statement on the set_volume() does not stop even when Ctrl-C is clicked. Need to change that! If not, will need to force
 # stop which eventually made the devices lost. Will require reboot.
+
+# 02/17/2022
+# the ssh doesnt allow for stop-event to work
+# the queue buffer increased in size rather than equal rate of get.() and put.()
 
