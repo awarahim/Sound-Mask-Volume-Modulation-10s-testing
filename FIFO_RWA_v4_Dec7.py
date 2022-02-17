@@ -36,6 +36,7 @@ def ref_mic(p, q1, stop_event):
     
     def callback(in_data, frame_count, time_info, status):
             data = rms(in_data)
+            print("in_data length", len(in_data))
             q1.put(data)
 #             print("q1:", q1.get())
             return in_data, pyaudio.paContinue
