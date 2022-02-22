@@ -31,7 +31,7 @@ def rms(data):
     fromType = np.int16
     d = np.frombuffer(data,fromType).astype(np.float) # convert data from buffer from int16 to float to calculate rms
     rms = np.sqrt(np.mean(d**2))
-    return int(rms)
+    return abs(int(rms))
 
 def ref_mic(p, q1, stop_event):   
     
@@ -48,7 +48,7 @@ def ref_mic(p, q1, stop_event):
         rate=RATE,
         frames_per_buffer=FRAMES_PER_BUFFER,
         input=True,
-        input_device_index=2,
+        input_device_index=1,
         stream_callback = callback)
     
     while not stop_event.wait(0):
@@ -84,7 +84,7 @@ def error_mic(p, q2, stop_event):
         rate=RATE,
         frames_per_buffer=FRAMES_PER_BUFFER,
         input=True,
-        input_device_index=1,
+        input_device_index=2,
         stream_callback = callback2)
     
     while not stop_event.wait(0):
@@ -174,7 +174,6 @@ def Moving_Average(q1, q2, q3, q4, stop_event, window= 10):
             getQ1 = q1.get()
             getQ2 = q2.get()
 #            print("getQ1:",getQ1,"GetQ2:",getQ2)
-
             # Calculate next one step window of the data
             Mnew_ref = Mprev_ref + (getQ1 - Mprev_ref)/window
             Mnew_err = Mprev_err + (getQ2 - Mprev_err)/window
@@ -219,7 +218,7 @@ def main_volume_modulation(q3, q4, volume_value, stop_event, W=10):
         
         difference = q3.get() - q4.get()  # getQ3 - getQ4    
         print("Q3 and Q4 OUT",q3.qsize(),q4.qsize())
-        volume_value.value = comparator(difference, current_volume, W, nu=1, v_threshold=100)
+        volume_value.value = comparator(difference, current_volume, W, nu=1, v_threshold=30)
         
         current_volume = volume_value.value # set the "current_volume" in modulating_volume function into new_volume because we always get 21, 19, 20
     
@@ -351,14 +350,14 @@ def thread_mask():
     device_check() # check if all device are recognized
     
     #period = 10
-    window = 10
+    window = 100
     
     q1 = mp.Queue()
     q2 = mp.Queue()
     q3 = mp.Queue()
     q4 = mp.Queue()
     
-    volume_value = mp.Value('d', 10.0)
+    volume_value = mp.Value('d', 1.0)
 
     p1 = mp.Process(target=Multithread_mic, args=(p,q1,q2,stop_event))
     p2 = mp.Process(target=loop_play, args=(volume_value, stop_event,))
