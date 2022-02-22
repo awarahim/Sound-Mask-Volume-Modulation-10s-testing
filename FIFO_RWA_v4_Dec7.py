@@ -175,7 +175,7 @@ def Moving_Average(q1, q2, q3, q4, stop_event, window= 10):
             getQ1 = q1.get()
             getQ2 = q2.get()
             
-            # Calculate next one step window of the data
+            # Calculate next one step window of the data following the formula: Mean of x_new = mean of x_old + (x_new - mean of x_old)/window
             Mnew_ref = Mprev_ref + (getQ1 - Mprev_ref)/window
             Mnew_err = Mprev_err + (getQ2 - Mprev_err)/window
 #             print(Mnew_ref, Mnew_err)
