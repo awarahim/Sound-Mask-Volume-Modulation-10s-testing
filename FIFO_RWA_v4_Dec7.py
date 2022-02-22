@@ -16,7 +16,7 @@ from subprocess import call
 
 # Stop signal handler by Ctrl-C
 stop_event = mp.Event()
-# with SSH it doesnt wokrk :(
+# with SSH it doesnt work :( to stop in terminal (headless) : Use Ctrl+Z
 
 # Constants for audio devices
 FORMAT  = pyaudio.paInt16    # 24-bit the mic is 24-bit with sample rate of 96kHz
@@ -37,7 +37,7 @@ def ref_mic(p, q1, stop_event):
     
     def callback(in_data, frame_count, time_info, status):
             data = rms(in_data)
-            print("in_data length", len(in_data))
+            print("in_data length", len(in_data)) # gives out 4096 == 1024*4
             q1.put(data)
 #             print("q1:", q1.get())
             return in_data, pyaudio.paContinue
@@ -73,7 +73,7 @@ def error_mic(p, q2, stop_event):
     
     def callback2(in_data2, frame_count2, time_info2, status2):
             data2 = rms(in_data2)
-            print("in_data2 length", len(in_data2))
+            print("in_data2 length", len(in_data2)) # gives 4096 == 1024*4
             q2.put(data2)
 #             print("q2:", q2.get())
             return in_data2, pyaudio.paContinue
