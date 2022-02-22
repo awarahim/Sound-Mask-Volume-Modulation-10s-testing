@@ -16,7 +16,7 @@ from subprocess import call
 
 # Stop signal handler by Ctrl-C
 stop_event = mp.Event()
-# with SSH it doesnt work :( to stop in terminal (headless) : Use Ctrl+Z
+# with SSH it doesnt wokrk :(
 
 # Constants for audio devices
 FORMAT  = pyaudio.paInt16    # 24-bit the mic is 24-bit with sample rate of 96kHz
@@ -37,8 +37,7 @@ def ref_mic(p, q1, stop_event):
     
     def callback(in_data, frame_count, time_info, status):
             data = rms(in_data)
-            #print("in_data length", len(in_data)) # gives out len(in_data) of 2048 = 1024*2
-            print(data)
+#            print("RMS of 2048: ",data)
             q1.put(data)
 #             print("q1:", q1.get())
             return in_data, pyaudio.paContinue
@@ -49,7 +48,7 @@ def ref_mic(p, q1, stop_event):
         rate=RATE,
         frames_per_buffer=FRAMES_PER_BUFFER,
         input=True,
-        input_device_index=1,
+        input_device_index=2,
         stream_callback = callback)
     
     while not stop_event.wait(0):
@@ -74,7 +73,7 @@ def error_mic(p, q2, stop_event):
     
     def callback2(in_data2, frame_count2, time_info2, status2):
             data2 = rms(in_data2)
-            print("in_data2 length", len(in_data2)) # gives 2048 == 1024*2
+#            print("in_data2 length", len(in_data2))
             q2.put(data2)
 #             print("q2:", q2.get())
             return in_data2, pyaudio.paContinue
@@ -85,7 +84,7 @@ def error_mic(p, q2, stop_event):
         rate=RATE,
         frames_per_buffer=FRAMES_PER_BUFFER,
         input=True,
-        input_device_index=2,
+        input_device_index=1,
         stream_callback = callback2)
     
     while not stop_event.wait(0):
@@ -174,8 +173,9 @@ def Moving_Average(q1, q2, q3, q4, stop_event, window= 10):
             
             getQ1 = q1.get()
             getQ2 = q2.get()
-            
-            # Calculate next one step window of the data following the formula: Mean of x_new = mean of x_old + (x_new - mean of x_old)/window
+#            print("getQ1:",getQ1,"GetQ2:",getQ2)
+
+            # Calculate next one step window of the data
             Mnew_ref = Mprev_ref + (getQ1 - Mprev_ref)/window
             Mnew_err = Mprev_err + (getQ2 - Mprev_err)/window
 #             print(Mnew_ref, Mnew_err)
@@ -183,11 +183,12 @@ def Moving_Average(q1, q2, q3, q4, stop_event, window= 10):
             # New mean becomes the previous mean
             Mprev_ref = Mnew_ref
             Mprev_err = Mnew_err
-            
+#            print("Mprev_ref:",Mprev_ref)
             # Save the data in the respective queues
             q3.put(Mprev_ref)
             q4.put(Mprev_err)
-        
+            print(q1.qsize(),q2.qsize())      
+#            print("q3 and q4 IN:", q3.qsize(),q4.qsize())
         print('Im out')
   
     print('Moving Average Stopped')
@@ -200,7 +201,7 @@ def Moving_Average(q1, q2, q3, q4, stop_event, window= 10):
 # Third Thread for simultaneous volume modulation
 def main_volume_modulation(q3, q4, volume_value, stop_event, W=10):
  
-    time.sleep(3) # wait for moving average to complete calculate and put data into q3 and q4
+    time.sleep(10) # wait for moving average to complete calculate and put data into q3 and q4
     
     print('volume modulation started')
 #     print('shared volume:', volume_value.value)
@@ -211,12 +212,13 @@ def main_volume_modulation(q3, q4, volume_value, stop_event, W=10):
     # cyclical linear ramp from 0 to 100
     while q3.qsize()> 0 and q4.qsize()> 0 and not stop_event.wait(0.5):
     
-        getQ3 = q3.get()
-        getQ4 = q4.get()
-        
+#        getQ3 = q3.get()
+#        getQ4 = q4.get()
+        print("Q3 and Q4 size IN:", q3.qsize(),q4.qsize())
 #         volume_value.value = (volume_value.value + 30) % 100
         
         difference = q3.get() - q4.get()  # getQ3 - getQ4    
+        print("Q3 and Q4 OUT",q3.qsize(),q4.qsize())
         volume_value.value = comparator(difference, current_volume, W, nu=1, v_threshold=100)
         
         current_volume = volume_value.value # set the "current_volume" in modulating_volume function into new_volume because we always get 21, 19, 20
