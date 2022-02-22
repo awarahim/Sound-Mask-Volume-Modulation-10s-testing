@@ -48,7 +48,7 @@ def ref_mic(p, q1, stop_event):
         rate=RATE,
         frames_per_buffer=FRAMES_PER_BUFFER,
         input=True,
-        input_device_index=3,
+        input_device_index=1,
         stream_callback = callback)
     
     while not stop_event.wait(0):
@@ -274,7 +274,7 @@ def whitenoise(volume_value):
                      channels = wf.getnchannels(),
                      rate = wf.getframerate(),
                      output=True,
-                     output_device_index=1,
+                     output_device_index=0,
                      stream_callback=callback_speaker)
 #     
 #     
