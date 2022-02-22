@@ -22,7 +22,7 @@ stop_event = mp.Event()
 FORMAT  = pyaudio.paInt16    # 24-bit the mic is 24-bit with sample rate of 96kHz
 CHANNELS = 2                 # number of audio streams to use. Since there is one speaker and one mic, use 2 streams
 RATE = 48000                # 48kHz since mic is specific at 48kHz
-FRAMES_PER_BUFFER = 1024    # 
+FRAMES_PER_BUFFER = 1024    # number of frames the speaker is taking in 
 
 
 # calculate RMS of data chunk
@@ -73,6 +73,7 @@ def error_mic(p, q2, stop_event):
     
     def callback2(in_data2, frame_count2, time_info2, status2):
             data2 = rms(in_data2)
+            print("in_data2 length", len(in_data2))
             q2.put(data2)
 #             print("q2:", q2.get())
             return in_data2, pyaudio.paContinue
