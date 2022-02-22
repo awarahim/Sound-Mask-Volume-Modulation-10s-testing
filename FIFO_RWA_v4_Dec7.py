@@ -20,7 +20,7 @@ stop_event = mp.Event()
 
 # Constants for audio devices
 FORMAT  = pyaudio.paInt16    # 24-bit the mic is 24-bit with sample rate of 96kHz
-CHANNELS = 2                 # number of audio streams to use. Since there is one speaker and one mic, use 2 streams
+CHANNELS = 1                 # number of audio streams to use. Since there is one speaker and one mic, use 2 streams
 RATE = 48000                # 48kHz since mic is specific at 48kHz
 FRAMES_PER_BUFFER = 1024    # number of frames the speaker is taking in 
 
