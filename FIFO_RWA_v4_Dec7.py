@@ -137,7 +137,7 @@ def Moving_Average(q1, q2, q3, q4, stop_event, window= 10):
     ref = []
     err = []    
     
-    time.sleep(1) # allow the q's fill up apparently until 7 data points only after 1s, so I put 2s to get more data 
+    time.sleep(0.1) # let it get some data
     print("size: ", q1.qsize(), q2.qsize()) 
     
     while q1.qsize()> 0 and q2.qsize()> 0 and not stop_event.wait(0.5):  #check if the qs are not empty
@@ -213,11 +213,11 @@ def main_volume_modulation(q3, q4, volume_value, stop_event, W=10):
     
 #        getQ3 = q3.get()
 #        getQ4 = q4.get()
-        print("Q3 and Q4 size IN:", q3.qsize(),q4.qsize())
+#       print("Q3 and Q4 size IN:", q3.qsize(),q4.qsize())
 #         volume_value.value = (volume_value.value + 30) % 100
         
         difference = q3.get() - q4.get()  # getQ3 - getQ4    
-        print("Q3 and Q4 OUT",q3.qsize(),q4.qsize())
+#       print("Q3 and Q4 OUT",q3.qsize(),q4.qsize())
         volume_value.value = comparator(difference, current_volume, W, nu=1, v_threshold=30)
         
         current_volume = volume_value.value # set the "current_volume" in modulating_volume function into new_volume because we always get 21, 19, 20
