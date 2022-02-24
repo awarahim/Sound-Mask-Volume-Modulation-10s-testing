@@ -198,7 +198,7 @@ def Moving_Average(q1, q2, q3, q4, stop_event, window= 10):
     
 #####################################################################################################################
 # Third Thread for simultaneous volume modulation
-def main_volume_modulation(q3, q4, volume_value, stop_event, W=10):
+def main_volume_modulation(q3, q4, volume_value, stop_event, vol_threshold, W=10):
  
     time.sleep(10) # wait for moving average to complete calculate and put data into q3 and q4
     
@@ -218,7 +218,7 @@ def main_volume_modulation(q3, q4, volume_value, stop_event, W=10):
         
         difference = q3.get() - q4.get()  # getQ3 - getQ4    
 #       print("Q3 and Q4 OUT",q3.qsize(),q4.qsize())
-        volume_value.value = comparator(difference, current_volume, W, nu=1, v_threshold=30)
+        volume_value.value = comparator(difference, current_volume, W, nu=1, vol_threshold)
         
         current_volume = volume_value.value # set the "current_volume" in modulating_volume function into new_volume because we always get 21, 19, 20
     
@@ -351,18 +351,20 @@ def thread_mask():
     
     #period = 10
     window = 10
+    threshold = 30
+    
     maxsize = window*10
     q1 = mp.Queue(maxsize)
     q2 = mp.Queue(maxsize)
     q3 = mp.Queue(maxsize)
     q4 = mp.Queue(maxsize)
     
-    volume_value = mp.Value('d', 1.0)
+    volume_value = mp.Value('d', 5.0)
 
     p1 = mp.Process(target=Multithread_mic, args=(p,q1,q2,stop_event))
     p2 = mp.Process(target=loop_play, args=(volume_value, stop_event,))
     p3 = mp.Process(target=Moving_Average, args=(q1, q2, q3, q4, stop_event, window))
-    p4 = mp.Process(target=main_volume_modulation, args = (q3,q4,volume_value, stop_event, window))
+    p4 = mp.Process(target=main_volume_modulation, args = (q3,q4,volume_value, stop_event, threshold, window))
     
     
     p1.start()
