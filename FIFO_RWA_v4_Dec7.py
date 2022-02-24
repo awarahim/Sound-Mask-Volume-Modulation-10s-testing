@@ -350,12 +350,12 @@ def thread_mask():
     device_check() # check if all device are recognized
     
     #period = 10
-    window = 100
-    
-    q1 = mp.Queue()
-    q2 = mp.Queue()
-    q3 = mp.Queue()
-    q4 = mp.Queue()
+    window = 10
+    maxsize = window*10
+    q1 = mp.Queue(maxsize)
+    q2 = mp.Queue(maxsize)
+    q3 = mp.Queue(maxsize)
+    q4 = mp.Queue(maxsize)
     
     volume_value = mp.Value('d', 1.0)
 
