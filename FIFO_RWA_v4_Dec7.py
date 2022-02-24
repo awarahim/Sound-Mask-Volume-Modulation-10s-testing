@@ -14,11 +14,18 @@ import numpy as np
 import time
 from subprocess import call
 
+import csv
+
+# Stop signal handler by Ctrl-C
+stop_event = mp.Event()
+# with SSH it doesnt wokrk :(
+
 # Constants for audio devices
 FORMAT  = pyaudio.paInt16    # 24-bit the mic is 24-bit with sample rate of 96kHz
-CHANNELS = 2                 # number of audio streams to use. Since there is one speaker and one mic, use 2 streams
+CHANNELS = 1                 # number of audio streams to use. Since there is one speaker and one mic, use 2 streams
 RATE = 48000                # 48kHz since mic is specific at 48kHz
-FRAMES_PER_BUFFER = 1024    # 
+FRAMES_PER_BUFFER = 1024    # number of frames the speaker is taking in 
+
 
 # calculate RMS of data chunk
 def rms(data):
@@ -26,12 +33,13 @@ def rms(data):
     fromType = np.int16
     d = np.frombuffer(data,fromType).astype(np.float) # convert data from buffer from int16 to float to calculate rms
     rms = np.sqrt(np.mean(d**2))
-    return int(rms)
+    return abs(int(rms))
 
-def ref_mic(p, q1, duration):   
+def ref_mic(p, q1, stop_event):   
     
     def callback(in_data, frame_count, time_info, status):
             data = rms(in_data)
+#            print("RMS of 2048: ",data)
             q1.put(data)
 #             print("q1:", q1.get())
             return in_data, pyaudio.paContinue
@@ -42,27 +50,32 @@ def ref_mic(p, q1, duration):
         rate=RATE,
         frames_per_buffer=FRAMES_PER_BUFFER,
         input=True,
-        input_device_index=2,
+        input_device_index=1,
         stream_callback = callback)
     
-    # start stream
-    stream2.start_stream()
-    
+    while not stop_event.wait(0):
+        # start stream
+        stream2.start_stream()
+        
+
     # control how long the stream to record
-    time.sleep(duration)
-    
+    # time.sleep(duration)
+
     # stop stream
     stream2.stop_stream()
+
     
     stream2.close()
-    p.terminate()
+#     p.terminate()
     
     # Send signal it stopped recording
-    q1.put("Stop")
+#    q1.put("Stop")
     
-def error_mic(p, q2, duration):
+def error_mic(p, q2, stop_event):
+    
     def callback2(in_data2, frame_count2, time_info2, status2):
             data2 = rms(in_data2)
+#            print("in_data2 length", len(in_data2))
             q2.put(data2)
 #             print("q2:", q2.get())
             return in_data2, pyaudio.paContinue
@@ -73,27 +86,39 @@ def error_mic(p, q2, duration):
         rate=RATE,
         frames_per_buffer=FRAMES_PER_BUFFER,
         input=True,
-        input_device_index=3,
+        input_device_index=2,
         stream_callback = callback2)
     
-    # start stream
-    stream.start_stream()
-    
-    # duration control how long the stream to record
-    time.sleep(duration)
-    
+    while not stop_event.wait(0):
+        # start stream
+        stream.start_stream()
+
+    # control how long the stream to record
+    #time.sleep(duration)
+
     # stop stream
     stream.stop_stream()
-    stream.close()
-    p.terminate()
+        
     
-    q2.put("Stop")
+    stream.close()
+#     p.terminate()
+    
+#    q2.put("Stop")
 
-
-def Multithread_mic(q1, q2, duration):
+def device_check():
     p = pyaudio.PyAudio()
-    t1 = threading.Thread(target=ref_mic, args=(p,q1,duration))
-    t2 = threading.Thread(target=error_mic, args=(p,q2, duration))
+    devices = []
+    
+    for ii in range(p.get_device_count()):
+        devices.append(p.get_device_info_by_index(ii).get('name'))
+        print(p.get_device_info_by_index(ii).get('name'))
+    
+    return devices
+
+def Multithread_mic(p,q1, q2, stop_event):
+
+    t1 = threading.Thread(target=ref_mic, args=(p,q1,stop_event))
+    t2 = threading.Thread(target=error_mic, args=(p,q2,stop_event))
     
     t1.start()
     t2.start()
@@ -101,16 +126,23 @@ def Multithread_mic(q1, q2, duration):
     t1.join()
     t2.join()
     
+    p.terminate()
+    print("Mic recording is stopped")
+
+
+
+
 #######################################################################################################################################    
 # Second Thread for simultaneous calculate the moving average of compiled RMS values
-def Moving_Average(q1, q2, q3, q4, window= 10):
+def Moving_Average(q1, q2, q3, q4, stop_event, window= 10):
     
     ref = []
     err = []    
     
-    time.sleep(1) # allow the q's fill up apparently until 7 data points only after 1s, so I put 2s to get more data 
+    time.sleep(0.5) # allow the q's fill up apparently until 7 data points only after 1s, so I put 2s to get more data 
     print("size: ", q1.qsize(), q2.qsize()) 
-    while q1.qsize()> 0 and q2.qsize()> 0:  #check if the qs are not empty
+    
+    while q1.qsize()> 0 and q2.qsize()> 0 and not stop_event.wait(0.5):  #check if the qs are not empty
         
         print('Moving Average Started')
         
@@ -120,7 +152,7 @@ def Moving_Average(q1, q2, q3, q4, window= 10):
                 err.append(q2.get())
                 q3.put(ref[n])
                 q4.put(err[n])
-#                 print(q1.qsize(),q2.qsize())
+#                print("1st Window",q1.qsize(),q2.qsize())
                 
         #Calculate the mean of first (window)
         Mprev_ref = np.mean(ref)
@@ -129,45 +161,76 @@ def Moving_Average(q1, q2, q3, q4, window= 10):
         # Put the means at the window'th position
         q3.put(Mprev_ref)
         q4.put(Mprev_err)
-        
+#        print("1st Mean",q3.qsize(),q4.qsize())
+
         #empty ref and err
         ref = []
         err = []
         
         print('Done first window')
-#         print(q1.qsize(), q2.qsize())
+#        print(q1.qsize(), q2.qsize())
         
         
-        while True:
-#             print(q1.qsize(),q2.qsize())
+        while not stop_event.wait(0.5):
+#            print("Q1 & Q2 IN",q1.qsize(),q2.qsize())
             
-            getQ1 = q1.get()
-            getQ2 = q2.get()
-            
-            if getQ1 == "Stop" or getQ2 == "Stop":
-                break
-
+#             getQ1 = q1.get()
+#             getQ2 = q2.get()
+#            print("getQ1:",getQ1,"GetQ2:",getQ2)
             # Calculate next one step window of the data
-            Mnew_ref = Mprev_ref + (getQ1 - Mprev_ref)/window
-            Mnew_err = Mprev_err + (getQ2 - Mprev_err)/window
+            Mnew_ref = Mprev_ref + (q1.get() - Mprev_ref)/window
+            Mnew_err = Mprev_err + (q2.get() - Mprev_err)/window
 #             print(Mnew_ref, Mnew_err)
-        
+#            print("Q1 & Q2 OUT", q1.qsize(), q2.qsize())
+ 
             # New mean becomes the previous mean
             Mprev_ref = Mnew_ref
             Mprev_err = Mnew_err
-            
+#            print("Mprev_ref:",Mprev_ref)
+
             # Save the data in the respective queues
             q3.put(Mprev_ref)
             q4.put(Mprev_err)
-        
+
+#            print("q3 and q4 IN:", q3.qsize(),q4.qsize())
         print('Im out')
-        # Stopping signal for volume modulation thread
-        q3.put("Stop")
-        q4.put("Stop")
-        break    
+  
     print('Moving Average Stopped')
+    
+    
+    
+    
+    
 #####################################################################################################################
-def comparator(difference, current_vol, window=10, nu=1, v_threshold=300):
+# Third Thread for simultaneous volume modulation
+def main_volume_modulation(q3, q4, volume_value, stop_event,vol_threshold, W=10):
+ 
+    time.sleep(10) # wait for moving average to complete calculate and put data into q3 and q4
+    
+    print('volume modulation started')
+#     print('shared volume:', volume_value.value)
+    
+    current_volume = volume_value.value # initializes current volume
+    
+    
+    # cyclical linear ramp from 0 to 100
+    while q3.qsize()> 0 and q4.qsize()> 0 and not stop_event.wait(0.5):
+    
+#        getQ3 = q3.get()
+#        getQ4 = q4.get()
+#         print("Q3 and Q4 size IN:", q3.qsize(),q4.qsize())
+#         volume_value.value = (volume_value.value + 30) % 100
+        
+        difference = q3.get() - q4.get()  # getQ3 - getQ4    
+#        print("Q3 and Q4 OUT",q3.qsize(),q4.qsize())
+        volume_value.value = comparator(difference, current_volume, W, vol_threshold, nu=1)
+        
+        current_volume = volume_value.value # set the "current_volume" in modulating_volume function into new_volume because we always get 21, 19, 20
+        
+   
+    print('volume modulation stopped')
+    
+def comparator(difference, current_vol, window=10, v_threshold=100, nu=1):
     # nu : the step size of volume being increased or decreased, in percent, ex: 1 = 1%
     # v_threshold : upper limit of the difference between the mics values
     # return: new volume
@@ -175,137 +238,163 @@ def comparator(difference, current_vol, window=10, nu=1, v_threshold=300):
     
     #initialize new volume
     new_vol = current_vol
-    print("volume difference: ",difference)
+
+#   save data of volume difference in csv file
+    file = open('Feb24_volume_difference_baseline.csv','a')
+    writer = csv.writer(file)
+    writer.writerow(str(difference))
+    file.close()
     
     # if the difference is within [-100, 100] don't change volume
     if difference >= -v_threshold and difference <= v_threshold:
        new_vol = current_vol
        
-#        print('same baseline')
+       print('same baseline', new_vol)
     
     elif difference < -v_threshold: # reference mic has smaller volume than error mic, lower the volume by nu
         new_vol = current_vol - nu
-#         print('ref smaller')
+        print('ref smaller', new_vol)
     
     elif difference > v_threshold: # reference mic is greater than error mic, then increase the volume by nu
         new_vol = current_vol + nu
-#         print('error smaller')
+        print('error smaller', new_vol)
 
     return new_vol
-
-# Getting Raspi's current speaker volume
-def set_volume(volume=20):
-    # Set the current volume to a percentage. default is 20%
-        
-    if volume >= 0 and volume <= 70: # 70 might be the loudest and still not disturbing. Need to check!
-        call(["amixer", "-D", "pulse", "sset", "Master", str(volume)+"%"])
-    
-    else:
-        volume = 20 # temporary conditions
-
-# Third Thread for simultaneous volume modulation
-def main_volume_modulation(q3, q4, W=10):
-    # Need to stop modulation when mic stopped running!
-    time.sleep(1) # wait for moving average to start
-    
-    print('volume modulation started')
-    
-#     start = time.time()
-    RATE = 48000             # 48kHz
-    FRAMES_PER_BUFFER = 1024
-    set_volume(10)
-    current_volume = 10 # initializes current volume
-    
-    while True:
-    
-        getQ3 = q3.get()
-        getQ4 = q4.get()
-        print("vol_mod:",getQ3, getQ4)
-        
-        if getQ3 == "Stop" and getQ4 == "Stop":
-                break
-        difference = getQ3 - getQ4    
-        new_volume = comparator(difference, current_volume, W)
-        set_volume(new_volume)
-        current_volume = new_volume # set the "current_volume" in modulating_volume function into new_volume because we always get 21, 19, 20
-    
-    print('volume modulation stopped')
-    
 ################################################################################################################################################    
 # Generating White Noise, y(n)
+
+# NONBLOCKING MODE    
+def whitenoise(volume_value):
     
-def whitenoise(duration=4):
-    
-    ##### minimum needed to read a wave #############################
-    # open the file for reading.
+     ##### minimum needed to read a wave #############################
+     # open the file for reading.
     wf = wave.open('BrownNoise_60s.wav', 'rb')
     
+    
+#     print('volume value', volume_value.value)
+     
     def callback_speaker(in_data, frame_count, time_info, status):
-        data = wf.readframes(frame_count)
-        return data, pyaudio.paContinue
-    
-    #create an audio object
+#          volume_value.value = (volume_value.value + 1) % 100
+         data = wf.readframes(frame_count)
+         data = set_volume(data,volume_value.value)
+         return data, pyaudio.paContinue
+     
+     #create an audio object
     p2 = pyaudio.PyAudio()
-    
-    # open stream based on the wave object which has been input
+     
+     # open stream based on the wave object which has been input
     stream3 = p2.open(format=p2.get_format_from_width(wf.getsampwidth()),
-                    channels = wf.getnchannels(),
-                    rate = wf.getframerate(),
-                    output=True,
-                    output_device_index=1,
-                    stream_callback=callback_speaker)
-    # start stream
+                     channels = wf.getnchannels(),
+                     rate = wf.getframerate(),
+                     output=True,
+                     output_device_index=0,
+                     stream_callback=callback_speaker)
+#     
+#     
+     # start stream
     stream3.start_stream()
     print("speaker playing")
-    
-    # control how long the stream to play
-    time.sleep(duration)
-    
-    # stop stream
+     
+     # control how long the stream to play
+    time.sleep(10)
+#         
+#         # stop stream
+#         
     stream3.stop_stream()
-
-        
+#         wf.rewind()
+         
     print('speaker stopped')    
-    # cleanup stuff
+     # cleanup stuff
     stream3.close()
-    wf.close()
-    # close PyAudio
+#     
+     # close PyAudio
     p2.terminate()
+     
+    wf.close()
+  
+def set_volume(datalist,volume):
+    """ Change value of list of audio chunks """
+#     print('calclated output volume: ', volume)
+    sound_level = (volume / 100.)
+        
+    fromType = np.int16
+    chunk = np.frombuffer(datalist,fromType).astype(np.float) 
+
+    chunk = chunk * sound_level
+#     print(chunk)
     
+    datalist = chunk.astype(np.int16)
+#     print(datalist)
+        
+    return datalist
 
 
+def loop_play(volume_value, stop_event):
+    while not stop_event.wait(0):
+        #whitenoise_block(q5, CHUNK=1024)
+        whitenoise(volume_value)
+        
+###########################################################################################
+def stop(signum, frame):
+    global stop_event
+    print(f"SIG[{signum}]")
+    stop_event.set()
+    
 ############################# Main code ###################################################
 def thread_mask():    
-    
     print('Start')
-    period = 120
+    
+    # os shutdown
+    #signal.signal(signal.SIGTERM, stop)
+    # ctrl-c
+    signal.signal(signal.SIGINT, stop)
+    
+    p = pyaudio.PyAudio()
+    
+#     # Making sure all devices are recognized first
+#     d = device_check()
+#     while len(d)<13:
+#         time.sleep(1)
+#         d = device_check()
+#
+    
+    device_check() # check if all device are recognized
+    
+    #period = 10
     window = 10
-    q1 = mp.Queue()
-    q2 = mp.Queue()
-    q3 = mp.Queue()
-    q4 = mp.Queue()
+    maxsize = window*10
+    threshold = 30
 
-    p1 = mp.Process(target=Multithread_mic, args=(q1,q2,period))
-#     p2 = mp.Process(target=whitenoise, args=(period,))
-    p3 = mp.Process(target=Moving_Average, args=(q1, q2, q3, q4, window))
-    p4 = mp.Process(target=main_volume_modulation, args = (q3,q4, window))
+    q1 = mp.Queue(maxsize)
+    q2 = mp.Queue(maxsize)
+    q3 = mp.Queue(maxsize)
+    q4 = mp.Queue(maxsize)
+    
+    volume_value = mp.Value('d', 5.0)
+
+    p1 = mp.Process(target=Multithread_mic, args=(p,q1,q2,stop_event))
+    p2 = mp.Process(target=loop_play, args=(volume_value, stop_event,))
+    p3 = mp.Process(target=Moving_Average, args=(q1, q2, q3, q4, stop_event, window))
+    p4 = mp.Process(target=main_volume_modulation, args = (q3,q4,volume_value, stop_event,threshold, window))
+    
     
     p1.start()
-#     p2.start()
+    p2.start()
     p3.start()
     p4.start()
     
+    
     p1.join()
-#     p2.join()
+    p2.join()
     p3.join()
-    p4.join()
-            
+    p4.join() 
+    
+    
     print('End')
 
 #######################################################################################################
    
 if __name__ == '__main__':
-    
     thread_mask()
     
 ####################### Notes ##########################################
@@ -379,3 +468,48 @@ if __name__ == '__main__':
 # Today, speaker is not detected although after being unplug: I think I broke the speaker
 # before that, the volume modulation was not able to control the system volume. They were not the same
 # Tested for 120s, but the volume modulation never stopped
+
+# 01/04/2022
+# The overall codes are successful for any time period.
+# attention: if the absolute volume difference is smaller than 100 then there will be no changes in volume
+#            where below is not printed: 
+#                           Simple mixer control 'Master',0
+#                           Capabilities: pvolume pswitch pswitch-joined
+#                           Playback channels: Front Left - Front Right
+#                           Limits: Playback 0 - 65536
+#                           Mono:
+#                           Front Left: Playback 6554 [10%] [on]
+#                           Front Right: Playback 6554 [10%] [on]
+#
+# Action needed: figure out "v_threshold" value that is necessary for the change in volume
+# Observation: if the printing of the vol_mod and volume difference continue even after the whitenoise done playing
+# meaning the mic, speaker, whitenoise thread finished first then the volume modulation ended.
+# Action needed: stop volume modulation when all all these three processes stop.
+
+# 01/06/2022
+# Stop signal is handled, not yet tested
+
+#01/11/2022
+# stop signal worked for all processes, just need to wait for the 1mins whitenoise finish playing then it will be done
+# loop playing whitenoise using additional thread is needed. There is no way blocking or non-blocking mode can rewind and play
+# infinitely without defining how long it should play
+# the system and speaker volume are not in sync.
+
+# 01/19/2022
+# speaker produce a choppy sound
+
+# 01/20/2022
+# Produce continuous sound
+# However, higher volume, there is a crackling sound
+# Test putting the error or reference mic closer to the speaker to see if they will change the volume up/down. Need to test some more
+# print statement on the set_volume() does not stop even when Ctrl-C is clicked. Need to change that! If not, will need to force
+# stop which eventually made the devices lost. Will require reboot.
+
+# 02/17/2022
+# the ssh doesnt allow for stop-event to work
+# the queue buffer increased in size rather than equal rate of get.() and put.()
+
+# 02/24/2022
+# tested baseline and recorded data in Feb24_volume_difference_baseline.csv
+
+
