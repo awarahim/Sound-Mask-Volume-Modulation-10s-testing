@@ -169,24 +169,23 @@ def Moving_Average(q1, q2, q3, q4, stop_event, window= 10):
         
         
         while not stop_event.wait(0.5):
-            print(q1.qsize(),q2.qsize())
+            print("q1 & q2 IN",q1.qsize(),q2.qsize())
             
-            getQ1 = q1.get()
-            getQ2 = q2.get()
-#            print("getQ1:",getQ1,"GetQ2:",getQ2)
             # Calculate next one step window of the data
-            Mnew_ref = Mprev_ref + (getQ1 - Mprev_ref)/window
-            Mnew_err = Mprev_err + (getQ2 - Mprev_err)/window
+            Mnew_ref = Mprev_ref + (q1.get() - Mprev_ref)/window
+            Mnew_err = Mprev_err + (q2.get() - Mprev_err)/window
 #             print(Mnew_ref, Mnew_err)
-        
+            print("q1 & q2 OUT:",q1.qsize(),q2.qsize()) 
+    
             # New mean becomes the previous mean
             Mprev_ref = Mnew_ref
             Mprev_err = Mnew_err
 #            print("Mprev_ref:",Mprev_ref)
+
             # Save the data in the respective queues
             q3.put(Mprev_ref)
             q4.put(Mprev_err)
-            print(q1.qsize(),q2.qsize())      
+                 
 #            print("q3 and q4 IN:", q3.qsize(),q4.qsize())
         print('Im out')
   
@@ -213,11 +212,13 @@ def main_volume_modulation(q3, q4, volume_value, stop_event, vol_threshold, W=10
     
 #        getQ3 = q3.get()
 #        getQ4 = q4.get()
-#       print("Q3 and Q4 size IN:", q3.qsize(),q4.qsize())
+        print("Q3 and Q4 size IN:", q3.qsize(),q4.qsize())
+
 #         volume_value.value = (volume_value.value + 30) % 100
         
         difference = q3.get() - q4.get()  # getQ3 - getQ4    
-#       print("Q3 and Q4 OUT",q3.qsize(),q4.qsize())
+        print("Q3 and Q4 OUT",q3.qsize(),q4.qsize())
+        
         volume_value.value = comparator(difference, current_volume, W, nu=1, vol_threshold)
         
         current_volume = volume_value.value # set the "current_volume" in modulating_volume function into new_volume because we always get 21, 19, 20
