@@ -28,13 +28,14 @@ FORMAT  = pyaudio.paInt16    # 24-bit the mic is 24-bit with sample rate of 96kH
 CHANNELS = 1                 # number of audio streams to use. Since there is one speaker and one mic, use 2 streams
 RATE = 48000                # 48kHz since mic is specific at 48kHz
 FRAMES_PER_BUFFER = 1024    # number of frames the speaker is taking in 
+WIDTH = 1
 
 filename = datetime.now().strftime('%b_%d_%H_%M_%S_InternalSoundbyte.wav')
 
 def prepare_file(fname):
     wf = wave.open(fname, 'wb')
     wf.setnchannels(CHANNELS)
-    wf.setsampwodth(p.get_sample_size(FORMAT))
+    wf.setsampwidth(WIDTH)
     wf.setframerate(RATE)
     return wf
 
@@ -114,6 +115,7 @@ def error_mic(p, q2, stop_event):
         
     
     stream.close()
+    wf.close()
 #     p.terminate()
     
 #    q2.put("Stop")
@@ -253,7 +255,7 @@ def comparator(difference, current_vol, window=10, v_threshold=100, nu=1):
     new_vol = current_vol
 
 #   save data of volume difference in csv file
-    file = open('Feb24_volume_difference_baseline.csv','a')
+    file = datetime.now().strftime('%b_%d_%H_%M_%S_volume_difference_baseline.csv','a')
     writer = csv.writer(file)
     writer.writerow(str(difference))
     file.close()
@@ -262,15 +264,15 @@ def comparator(difference, current_vol, window=10, v_threshold=100, nu=1):
     if difference >= -v_threshold and difference <= v_threshold:
        new_vol = current_vol
        
-       print('same baseline', new_vol)
+       print('same baseline', 'volume:', new_vol, 'difference', difference)
     
     elif difference < -v_threshold: # reference mic has smaller volume than error mic, lower the volume by nu
         new_vol = current_vol - nu
-        print('ref smaller', new_vol)
+        print('ref smaller', 'volume:', new_vol, 'difference', difference)
     
     elif difference > v_threshold: # reference mic is greater than error mic, then increase the volume by nu
         new_vol = current_vol + nu
-        print('error smaller', new_vol)
+        print('error smaller', 'volume:', new_vol, 'difference', difference)
 
     return new_vol
 ################################################################################################################################################    
@@ -281,14 +283,14 @@ def whitenoise(volume_value):
     
      ##### minimum needed to read a wave #############################
      # open the file for reading.
-    wf = wave.open('BrownNoise_60s.wav', 'rb')
+    WF = wave.open('BrownNoise_60s.wav', 'rb')
     
     
 #     print('volume value', volume_value.value)
      
     def callback_speaker(in_data, frame_count, time_info, status):
 #          volume_value.value = (volume_value.value + 1) % 100
-         data = wf.readframes(frame_count)
+         data = WF.readframes(frame_count)
          data = set_volume(data,volume_value.value)
          return data, pyaudio.paContinue
      
@@ -296,9 +298,9 @@ def whitenoise(volume_value):
     p2 = pyaudio.PyAudio()
      
      # open stream based on the wave object which has been input
-    stream3 = p2.open(format=p2.get_format_from_width(wf.getsampwidth()),
-                     channels = wf.getnchannels(),
-                     rate = wf.getframerate(),
+    stream3 = p2.open(format=p2.get_format_from_width(WF.getsampwidth()),
+                     channels = WF.getnchannels(),
+                     rate = WF.getframerate(),
                      output=True,
                      output_device_index=0,
                      stream_callback=callback_speaker)
@@ -323,21 +325,36 @@ def whitenoise(volume_value):
      # close PyAudio
     p2.terminate()
      
-    wf.close()
+    WF.close()
   
 def set_volume(datalist,volume):
     """ Change value of list of audio chunks """
 #     print('calclated output volume: ', volume)
-    sound_level = (volume / 100.)
-        
-    fromType = np.int16
-    chunk = np.frombuffer(datalist,fromType).astype(np.float) 
-
-    chunk = chunk * sound_level
-#     print(chunk)
+    if volume >= 0 and volume <= 100: #only changes the volume when volume is within [0,100]
     
-    datalist = chunk.astype(np.int16)
-#     print(datalist)
+        sound_level = (volume / 100.)
+            
+        fromType = np.int16
+        chunk = np.frombuffer(datalist,fromType).astype(np.float) 
+
+        chunk = chunk * sound_level
+    #     print(chunk)
+        
+        datalist = chunk.astype(np.int16)
+    #     print(datalist)
+    elif volume < 0:
+        sound_level = 0
+        fromType = np.int16
+        chunk = np.frombuffer(datalist,fromType).astype(np.float)
+        chunk = chunk*sound_level
+        datalist = chunk.astype(np.int16)
+    
+    elif volume > 100:
+        sound_level = 100
+        fromType = np.int16
+        chunk = np.frombuffer(datalist,fromType).astype(np.float)
+        chunk = chunk*sound_level
+        datalist = chunk.astype(np.int16)
         
     return datalist
 
