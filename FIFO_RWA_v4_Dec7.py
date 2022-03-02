@@ -540,3 +540,9 @@ if __name__ == '__main__':
 # the ssh doesnt allow for stop-event to work
 # the queue buffer increased in size rather than equal rate of get.() and put.()
 
+# 03/02/2022
+# window size = maxsize of queue faster response
+# threshold changed from 30 to 10
+# however, when the ambient noise get lowered down, the reference mic is smaller in value, pushes the comparator to reduce the volume by 1
+# when the new volume passed 0 and become negative volume, it will cause a build up of negative value to be catch up on when the ambinet noise
+# increase in level. Need to set when new volume equal to 0, the next new volume also equal to 0 if the difference is still negative.
