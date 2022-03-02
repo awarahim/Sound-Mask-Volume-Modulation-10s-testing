@@ -14,6 +14,9 @@ import numpy as np
 import time
 from subprocess import call
 
+from datetime import datetime
+import wave
+
 import csv
 
 # Stop signal handler by Ctrl-C
@@ -26,6 +29,14 @@ CHANNELS = 1                 # number of audio streams to use. Since there is on
 RATE = 48000                # 48kHz since mic is specific at 48kHz
 FRAMES_PER_BUFFER = 1024    # number of frames the speaker is taking in 
 
+filename = datetime.now().strftime('%b_%d_%H_%M_%S_InternalSoundbyte.wav')
+
+def prepare_file(fname):
+    wf = wave.open(fname, 'wb')
+    wf.setnchannels(CHANNELS)
+    wf.setsampwodth(p.get_sample_size(FORMAT))
+    wf.setframerate(RATE)
+    return wf
 
 # calculate RMS of data chunk
 def rms(data):
@@ -72,8 +83,10 @@ def ref_mic(p, q1, stop_event):
 #    q1.put("Stop")
     
 def error_mic(p, q2, stop_event):
+    wf = prepare_file(filename)
     
     def callback2(in_data2, frame_count2, time_info2, status2):
+            wf.writeframes(in_data2) # record in_data to observe the changes of audio output by loudspeaker
             data2 = rms(in_data2)
 #            print("in_data2 length", len(in_data2))
             q2.put(data2)
@@ -508,8 +521,4 @@ if __name__ == '__main__':
 # 02/17/2022
 # the ssh doesnt allow for stop-event to work
 # the queue buffer increased in size rather than equal rate of get.() and put.()
-
-# 02/24/2022
-# tested baseline and recorded data in Feb24_volume_difference_baseline.csv
-
 
