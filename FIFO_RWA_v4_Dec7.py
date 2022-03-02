@@ -32,10 +32,10 @@ WIDTH = 2
 
 filename = datetime.now().strftime('%b_%d_%H_%M_%S_InternalSoundbyte.wav')
 
-def prepare_file(fname):
+def prepare_file(p,fname):
     wf = wave.open(fname, 'wb')
     wf.setnchannels(CHANNELS)
-    wf.setsampwidth(WIDTH)
+    wf.setsampwidth(p.get_sample_size(pyaudio.paInt16))
     wf.setframerate(RATE)
     return wf
 
@@ -84,7 +84,7 @@ def ref_mic(p, q1, stop_event):
 #    q1.put("Stop")
     
 def error_mic(p, q2, stop_event):
-    wf = prepare_file(filename)
+    wf = prepare_file(p,filename)
     
     def callback2(in_data2, frame_count2, time_info2, status2):
             wf.writeframes(in_data2) # record in_data to observe the changes of audio output by loudspeaker
@@ -219,7 +219,7 @@ def Moving_Average(q1, q2, q3, q4, stop_event, window= 10):
 #####################################################################################################################
 # Third Thread for simultaneous volume modulation
 def main_volume_modulation(q3, q4, volume_value, stop_event,vol_threshold, W=10):
-    file = datetime.now().strftime('%b_%d_%H_%M_%S_volume_difference_baseline.csv')
+    file = datetime.now().strftime('%b_%d_%H_%M_%S_VMSM_test.csv')
     
     time.sleep(10) # wait for moving average to complete calculate and put data into q3 and q4
     
@@ -269,10 +269,14 @@ def comparator(file, difference, current_vol, window=10, v_threshold=100, nu=1):
         new_vol = current_vol + nu
         print('error smaller', 'volume:', new_vol, 'difference', difference)
     
+    if new_vol <= 5 :
+        new_vol = 5
+        print('volume became negative, so set it to', new_vol)
+        
     #   save data of volume difference in csv file
     file = open(file,'a')
     writer = csv.writer(file)
-    writer.writerow(['difference:', difference, 'new volume:', new_vol])
+    writer.writerow(['time',datetime.now().strftime('%H:%M:%S:%f') ,'difference:', difference, 'new volume:', new_vol])
     file.close()
     
     return new_vol
@@ -344,7 +348,7 @@ def set_volume(datalist,volume):
         datalist = chunk.astype(np.int16)
     #     print(datalist)
     elif volume < 0:
-        sound_level = (0/100.0)
+        sound_level = (5/100.0)
         fromType = np.int16
         chunk = np.frombuffer(datalist,fromType).astype(np.float)
         chunk = chunk*sound_level
@@ -364,7 +368,7 @@ def loop_play(volume_value, stop_event):
     while not stop_event.wait(0):
         #whitenoise_block(q5, CHUNK=1024)
         whitenoise(volume_value)
-        
+    print(datetime.now())    
 ###########################################################################################
 def stop(signum, frame):
     global stop_event
@@ -401,7 +405,7 @@ def thread_mask():
     q3 = mp.Queue(maxsize)
     q4 = mp.Queue(maxsize)
     
-    volume_value = mp.Value('d', 1.0)
+    volume_value = mp.Value('d', 5.0)
 
     p1 = mp.Process(target=Multithread_mic, args=(p,q1,q2,stop_event))
     p2 = mp.Process(target=loop_play, args=(volume_value, stop_event,))
@@ -540,9 +544,3 @@ if __name__ == '__main__':
 # the ssh doesnt allow for stop-event to work
 # the queue buffer increased in size rather than equal rate of get.() and put.()
 
-# 03/02/2022
-# window size = maxsize of queue faster response
-# threshold changed from 30 to 10
-# however, when the ambient noise get lowered down, the reference mic is smaller in value, pushes the comparator to reduce the volume by 1
-# when the new volume passed 0 and become negative volume, it will cause a build up of negative value to be catch up on when the ambinet noise
-# increase in level. Need to set when new volume equal to 0, the next new volume also equal to 0 if the difference is still negative.
