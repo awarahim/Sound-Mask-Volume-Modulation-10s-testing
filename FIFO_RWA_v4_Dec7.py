@@ -28,7 +28,7 @@ FORMAT  = pyaudio.paInt16    # 24-bit the mic is 24-bit with sample rate of 96kH
 CHANNELS = 1                 # number of audio streams to use. Since there is one speaker and one mic, use 2 streams
 RATE = 48000                # 48kHz since mic is specific at 48kHz
 FRAMES_PER_BUFFER = 1024    # number of frames the speaker is taking in 
-WIDTH = 1
+WIDTH = 2
 
 filename = datetime.now().strftime('%b_%d_%H_%M_%S_InternalSoundbyte.wav')
 
@@ -219,7 +219,8 @@ def Moving_Average(q1, q2, q3, q4, stop_event, window= 10):
 #####################################################################################################################
 # Third Thread for simultaneous volume modulation
 def main_volume_modulation(q3, q4, volume_value, stop_event,vol_threshold, W=10):
- 
+    file = datetime.now().strftime('%b_%d_%H_%M_%S_volume_difference_baseline.csv')
+    
     time.sleep(10) # wait for moving average to complete calculate and put data into q3 and q4
     
     print('volume modulation started')
@@ -238,14 +239,14 @@ def main_volume_modulation(q3, q4, volume_value, stop_event,vol_threshold, W=10)
         
         difference = q3.get() - q4.get()  # getQ3 - getQ4    
 #        print("Q3 and Q4 OUT",q3.qsize(),q4.qsize())
-        volume_value.value = comparator(difference, current_volume, W, vol_threshold, nu=1)
+        volume_value.value = comparator(file, difference, current_volume, W, vol_threshold, nu=1)
         
         current_volume = volume_value.value # set the "current_volume" in modulating_volume function into new_volume because we always get 21, 19, 20
         
    
     print('volume modulation stopped')
     
-def comparator(difference, current_vol, window=10, v_threshold=100, nu=1):
+def comparator(file, difference, current_vol, window=10, v_threshold=100, nu=1):
     # nu : the step size of volume being increased or decreased, in percent, ex: 1 = 1%
     # v_threshold : upper limit of the difference between the mics values
     # return: new volume
@@ -253,12 +254,6 @@ def comparator(difference, current_vol, window=10, v_threshold=100, nu=1):
     
     #initialize new volume
     new_vol = current_vol
-
-#   save data of volume difference in csv file
-    file = datetime.now().strftime('%b_%d_%H_%M_%S_volume_difference_baseline.csv','a')
-    writer = csv.writer(file)
-    writer.writerow(str(difference))
-    file.close()
     
     # if the difference is within [-100, 100] don't change volume
     if difference >= -v_threshold and difference <= v_threshold:
@@ -273,7 +268,13 @@ def comparator(difference, current_vol, window=10, v_threshold=100, nu=1):
     elif difference > v_threshold: # reference mic is greater than error mic, then increase the volume by nu
         new_vol = current_vol + nu
         print('error smaller', 'volume:', new_vol, 'difference', difference)
-
+    
+    #   save data of volume difference in csv file
+    file = open(file,'a')
+    writer = csv.writer(file)
+    writer.writerow(['difference:', difference, 'new volume:', new_vol])
+    file.close()
+    
     return new_vol
 ################################################################################################################################################    
 # Generating White Noise, y(n)
@@ -343,14 +344,14 @@ def set_volume(datalist,volume):
         datalist = chunk.astype(np.int16)
     #     print(datalist)
     elif volume < 0:
-        sound_level = 0
+        sound_level = (0/100.0)
         fromType = np.int16
         chunk = np.frombuffer(datalist,fromType).astype(np.float)
         chunk = chunk*sound_level
         datalist = chunk.astype(np.int16)
     
     elif volume > 100:
-        sound_level = 100
+        sound_level = (100/100.)
         fromType = np.int16
         chunk = np.frombuffer(datalist,fromType).astype(np.float)
         chunk = chunk*sound_level
@@ -391,16 +392,16 @@ def thread_mask():
     device_check() # check if all device are recognized
     
     #period = 10
-    window = 10
-    maxsize = window*10
-    threshold = 30
+    window = 5
+    maxsize = window
+    threshold = 10
 
     q1 = mp.Queue(maxsize)
     q2 = mp.Queue(maxsize)
     q3 = mp.Queue(maxsize)
     q4 = mp.Queue(maxsize)
     
-    volume_value = mp.Value('d', 5.0)
+    volume_value = mp.Value('d', 1.0)
 
     p1 = mp.Process(target=Multithread_mic, args=(p,q1,q2,stop_event))
     p2 = mp.Process(target=loop_play, args=(volume_value, stop_event,))
