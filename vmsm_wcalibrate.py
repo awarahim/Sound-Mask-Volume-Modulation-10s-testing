@@ -270,7 +270,9 @@ def main_volume_modulation(q3, q4, volume_value, stop_event,vol_threshold, durat
         
         difference = q3.get() - q4.get()  # getQ3 - getQ4    
 #        print("Q3 and Q4 OUT",q3.qsize(),q4.qsize())
-        volume_value.value = comparator(file, difference, current_volume, W, vol_threshold.value, nu=0.1)
+        nu = 0.1
+        volume_value.value = comparator(file, difference, current_volume, W, vol_threshold.value, nu)
+        logging.info('volume step size:' + str(nu))
         
         current_volume = volume_value.value # set the "current_volume" in modulating_volume function into new_volume because we always get 21, 19, 20
         
@@ -434,20 +436,28 @@ def thread_mask():
     #signal.signal(signal.SIGTERM, stop)
     # ctrl-c
     signal.signal(signal.SIGINT, stop)
-  
+    
+#     # Making sure all devices are recognized first
+#     d = device_check()
+#     while len(d)<13:
+#         time.sleep(1)
+#         d = device_check()
     
     #period = 10
-    window = 10
+    print('Enter window size:')
+    window = int(input())
+    logging.info('window size:' + str(window))
     maxsize = 50
     vol_threshold = mp.Value('d', 10.0) # initial value of threshold value
     calibrate_duration = 3*60 # in seconds
+    volume_value = mp.Value('d', 5.0)
     
     q1 = mp.Queue(maxsize)
     q2 = mp.Queue(maxsize)
     q3 = mp.Queue(maxsize)
     q4 = mp.Queue(maxsize)
     
-    volume_value = mp.Value('d', 5.0)
+    
 
     p1 = mp.Process(target=multithread_mic, args=(q1,q2,stop_event))
     p2 = mp.Process(target=loop_play, args=(volume_value, stop_event,))
