@@ -244,7 +244,7 @@ def vol_diff_calibrate(q3,q4, vol_threshold, stop_event, duration=1*60):
     print('done calibrated threshold:', vol_threshold)
     return vol_threshold
 
-def main_volume_modulation(q3, q4, volume_value, stop_event,vol_threshold, duration, W=10):
+def main_volume_modulation(q3, q4, delta, volume_value, stop_event,vol_threshold, duration, W=10):
     file = datetime.now().strftime('%b_%d_%H_%M_%S_VMSM_test.csv')
     
     #time.sleep(1) # wait for moving average to complete calculate and put data into q3 and q4
@@ -270,7 +270,10 @@ def main_volume_modulation(q3, q4, volume_value, stop_event,vol_threshold, durat
         
         difference = q3.get() - q4.get()  # getQ3 - getQ4    
 #        print("Q3 and Q4 OUT",q3.qsize(),q4.qsize())
-        nu = 0.1
+        # "Learning rate" / "sensitivity" of volume adjustment
+        delta = delta # The larger this number, the longer it should take to reach the target volume
+        nu = abs(difference / delta)
+        print('NU:', nu)
         volume_value.value = comparator(file, difference, current_volume, W, vol_threshold.value, nu)
         logging.info('volume step size:' + str(nu))
         
@@ -429,9 +432,7 @@ def stop(signum, frame):
 
 ############################# Main code ###################################################
 def thread_mask():    
-    logging.info('Start ' + str(datetime.now()))
-    print('Start at ', datetime.now())
-    
+
     # os shutdown
     #signal.signal(signal.SIGTERM, stop)
     # ctrl-c
@@ -447,7 +448,13 @@ def thread_mask():
     print('Enter window size:')
     window = int(input())
     logging.info('window size:' + str(window))
-    maxsize = 50
+    print('Enter max_size:')
+    maxsize = int(input())
+    logging.info('max Queue size:' + str(maxsize))
+    print('Enter delta:')
+    delta = int(input())
+    logging.info('delta:' + str(delta))
+    
     vol_threshold = mp.Value('d', 10.0) # initial value of threshold value
     calibrate_duration = 3*60 # in seconds
     volume_value = mp.Value('d', 5.0)
@@ -457,12 +464,14 @@ def thread_mask():
     q3 = mp.Queue(maxsize)
     q4 = mp.Queue(maxsize)
     
+    logging.info('Start ' + str(datetime.now()))
+    print('Start at ', datetime.now())
     
 
     p1 = mp.Process(target=multithread_mic, args=(q1,q2,stop_event))
     p2 = mp.Process(target=loop_play, args=(volume_value, stop_event,))
     p3 = mp.Process(target=moving_average, args=(q1, q2, q3, q4, stop_event, window))
-    p4 = mp.Process(target=main_volume_modulation, args = (q3,q4,volume_value, stop_event,vol_threshold, calibrate_duration, window))
+    p4 = mp.Process(target=main_volume_modulation, args = (q3,q4,delta,volume_value, stop_event,vol_threshold, calibrate_duration, window))
     
     p1.start()
     p2.start()
