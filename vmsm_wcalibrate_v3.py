@@ -68,10 +68,15 @@ def rms(data):
 def ref_mic(p, q1, stop_event):   
     logging.info('ref mic running...')
     print('ref mic running...')
+    ref_fname = datetime.now().strftime('%b_%d_%H_%M_%S_ref_data.csv')
+    
     def callback(in_data, frame_count, time_info, status):
             data = rms(in_data)
 #            print("RMS of 2048: ",data)
             q1.put(data)
+            with open(ref_fname, 'a') as f:
+                csvwriter = csv.writer(f)
+                csvwriter.writerow(['time', datetime.now().strftime('%H:%M:%S:%f'), 'data', str(data)])
 #             print("q1:", q1.get())
             return in_data, pyaudio.paContinue
         
@@ -99,13 +104,18 @@ def ref_mic(p, q1, stop_event):
 def error_mic(p, q2, stop_event):
     wf = prepare_wavfile(p)
     print('error mic running...')
-#    logging.info('error mic running...')    
+#    logging.info('error mic running...')
+    err_fname = datetime.now().strftime('%b_%d_%H_%M_%S_error_data.csv')
     def callback2(in_data2, frame_count2, time_info2, status2):
             wf.writeframes(in_data2) # record in_data to observe the changes of audio output by loudspeaker
             data2 = rms(in_data2)
 #            print("in_data2 length", len(in_data2))
             q2.put(data2)
 #             print("q2:", q2.get())
+            with open(err_fname, 'a') as w:
+                csvwriter2 = csv.writer(w)
+                csvwriter2.writerow(['time', datetime.now().strftime('%H:%M:%S:%f'), 'data', str(data2)])
+                
             return in_data2, pyaudio.paContinue
         
     stream = p.open(
@@ -159,7 +169,7 @@ def moving_average(q1, q2, q3, q4, stop_event, window= 10):
     logging.info("initial Q1 and Q2 size: " + str(q1.qsize()) + ' ' + str(q2.qsize())) 
     print('Initial Q1 Q2 size:', q1.qsize(), q2.qsize())
 
-    while q1.qsize()> 0 and q2.qsize()> 0 and not stop_event.wait(0.1):  #check if the qs are not empty , the timeout must be the same for all other functions except microphones
+    while q1.qsize()> 0 and q2.qsize()> 0 and not stop_event.wait(0.1):  #check if the qs are not empty
         
         logging.info('Moving Average Started')
         print('Moving Average Started')        
@@ -251,7 +261,7 @@ def main_volume_modulation(q3, q4, delta, volume_value, stop_event,vol_threshold
     
     vol_threshold.value = vol_diff_calibrate(q3,q4, vol_threshold.value, stop_event, duration)
     
-#     time.sleep(5) # test if the volume modulation would make a pre-stop
+#     time.sleep(1)
     logging.info('volume modulation started')
     print('volume modulation started')
 
@@ -261,7 +271,8 @@ def main_volume_modulation(q3, q4, delta, volume_value, stop_event,vol_threshold
     
     
     # cyclical linear ramp from 0 to 100
-    while q3.qsize()> 0 and q4.qsize()> 0 and not stop_event.wait(0.1): # timeout must be the same for all functions except the microphones
+    print('q3 & q4 size:',q3.qsize(), q4.qsize())
+    while q3.qsize()> 0 and q4.qsize()> 0 and not stop_event.wait(0.1):
     
 #        getQ3 = q3.get()
 #        getQ4 = q4.get()
@@ -501,3 +512,6 @@ if __name__ == '__main__':
     
 
 
+## Notes
+    # timeout for stop_event.wait(0.1) must be the same for all functions for volume modulation to not have pre-termination.
+    # Does timeout cause data to be collected every 0.1s or previously 0.5s? Yes. and stop_event.wait(cannot be blank) 
