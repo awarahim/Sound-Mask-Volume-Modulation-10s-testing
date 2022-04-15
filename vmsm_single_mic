@@ -27,6 +27,15 @@ CHANNELS = 1                 # number of audio streams to use. Since there is on
 RATE = 48000                # 48kHz since mic is specific at 48kHz
 FRAMES_PER_BUFFER = 1024    # number of frames the speaker is taking in 
 
+# helper functions
+def clear(q):
+    "Clear the queue for better microphone stopping"
+    trigger = True
+    while trigger:
+        q.get_nowait()
+        if q.empty():
+            trigger = False
+
 # calculate RMS of data chunk
 def rms(data):
     if len(data) == 1: return print('data length =1')
@@ -44,12 +53,13 @@ def error_mic(q1, stop_event):
 
     err_data = [] # need to cast to int16
     
-    def callback2(in_data2, frame_count2, time_info2, status2):
-        data2 = rms(in_data2)
-        q2.put(data2)
-        err_data.append(data2)
+    def callback2(in_data, frame_count, time_info, status):
+        data = rms(in_data)
+        q1.put(data)
+        err_data.append(data)
+#         print(q1.qsize())
 
-        return in_data2, pyaudio.paContinue
+        return in_data, pyaudio.paContinue
         
     stream = p.open(
         format=FORMAT,
@@ -57,12 +67,15 @@ def error_mic(q1, stop_event):
         rate=RATE,
         frames_per_buffer=FRAMES_PER_BUFFER,
         input=True,
-        input_device_index=3,
+        input_device_index=2,
         stream_callback = callback2)
             
-    while not stop_event.wait(0.1): # data coming in is really fast, use 1s for the wait
+    while not stop_event.wait(0.5): # data coming in is really fast, use 1s for the wait
         # start stream
         stream.start_stream()    
+    if stop_event.wait(1):
+       clear(q1)
+       
     stream.stop_stream()
     print('error mic is stopped')
     stream.close()
@@ -73,35 +86,39 @@ def error_mic(q1, stop_event):
 # Second Thread for simultaneous calculate the moving average of compiled RMS values
 def moving_average(q1, q2, stop_event, window= 10):
     err = []    
-    
-    time.sleep(0.5) # allow the q's fill up apparently until 7 data points only after 1s, so I put 2s to get more data 
     print('Initial Q1 Q2 size:', q1.qsize(), q2.qsize())
 
-    while q1.qsize()> 0 and not stop_event.wait(0.1):  #check if the qs are not empty
+    if q1.qsize()> 0:  #check if the qs are not empty
         print('Moving Average Started')        
         # Put first Window-1 to be the same number as non-averaged rms number
         for n in range(0,window):
-                err.append(q1.get())
-                q2.put(err[n])
+            err.append(q1.get())
+            q2.put(err[n])
                 
         #Calculate the mean of first (window)
         Mprev_err = np.mean(err)
         
         # Put the means at the window'th position
         q2.put(Mprev_err)
+        print("done first window")
 
         #empty buffer
         err = []        
         
         while not stop_event.wait(0.1):
+#             print("I'm in")
+            Q1_get = q1.get()
+#             print('Q1 taken:', Q1_get)
             # Calculate next one step window of the data
-            Mnew_err = Mprev_err + (q2.get() - Mprev_err)/window
+            Mnew_err = Mprev_err + (Q1_get - Mprev_err)/window
  
             # New mean becomes the previous mean
             Mprev_err = Mnew_err
 
             # Save the data in the respective queues
             q2.put(Mprev_err)
+#             print(q2.get()) check termination
+#             print('Q2 size in moving average:', q2.qsize())
 
     print('Moving Average Stopped')
     
@@ -111,81 +128,104 @@ def moving_average(q1, q2, stop_event, window= 10):
 #####################################################################################################################
 # Third Thread for simultaneous volume modulation
 
-def vol_diff_calibrate(q2, vol_threshold, stop_event, duration=1*60):
+def vol_diff_calibrate(q2,stop_event, duration=100):
    
     buffer = []
-    start = time.time()
-    elapsed = 0
 
     print('calibrating...', datetime.now())
 
-    while elapsed < duration and not stop_event.wait(0.1):
+    for _ in range(0,duration):
+#         print('Q2 size in calibrate:', q2.qsize())
         err_signal = q2.get()
+#        print('err_signal') # need to see the fluctuation of signal of the same volume level which will determine the margin for comparator function
         buffer.append(err_signal)
-        current = time.time()
-        elapsed = current - start
-    mean = abs(np.mean(buffer)) # must only give positive threshold
+        
+#    mean = abs(np.mean(buffer)) # must only give positive threshold
+    min = abs(np.min(buffer[10:]))
+    max = abs(np.max(buffer[10:]))
+    print('min:', min, 'max:', max)
+    
+#    vol_threshold = round(mean)
+#    print('done calibrated threshold:', vol_threshold)
 
-    vol_threshold = round(mean)
-    print('done calibrated threshold:', vol_threshold)
+    return min, max
 
-    return vol_threshold
-
-def main_volume_modulation(q2, delta, volume_value, stop_event,vol_threshold, duration, W=10):
+def main_volume_modulation(q2, delta, volume_value, stop_event,min_threshold,max_threshold, duration, W=10):
     file = datetime.now().strftime('%b_%d_%H_%M_%S_VMSM_single_mic.csv')
+       
+    min_threshold.value,max_threshold.value = vol_diff_calibrate(q2, stop_event, duration)
     
-    time.sleep(1) # wait for moving average to complete calculate and put data into q3 and q4
-    
-    vol_threshold.value = vol_diff_calibrate(q3,q4, vol_threshold.value, stop_event, duration)
-    
-#     time.sleep(1)
     print('volume modulation started')
     
+    time.sleep(20) # wait till q2 is filled again after calibration
     current_volume = volume_value.value # initializes current volume
+#     print('initial Q2 size:', q2.qsize())
+    min_size = 5
     
-    while q2.qsize()> 0 and not stop_event.wait(0.1):
-        err_signal = q2.get()
+    while not stop_event.wait(0.1):
+#         print('Q2 size:', q2.qsize())
+    # Check if the signal decrease/increase consistently for the first 10 get, then trigger comparator to change volume
+        temps = []
+        for _ in range(min_size):
+            temps.append(q2.get())
         
-        # "Learning rate" / "sensitivity" of volume adjustment
-        delta = delta # The larger this number, the longer it should take to reach the target volume
-        nu = abs(err_signal / delta)
-        volume_value.value = comparator(file, err_signal, current_volume, W, vol_threshold.value, nu)
-#         logging.info('volume step size:' + str(nu))
-        
-        current_volume = volume_value.value # set the "current_volume" in modulating_volume function into new_volume because we always get 21, 19, 20
-        
-        print('volume modulation stopped')
+        # Classify conditions
+        for i in range(len(temps)-1):
+            # Decreasing
+            if temps[i] > temps[i+1]:
+                temps[i] = 1
+            # Increasing
+            elif temps[i]< temps[i+1]:
+                temps[i] = 0
+            else: # temps[i]==temps[i+1]:
+                temps[i] = 2
+                
+        print(sum(temps))
+        # Trigger volume change based on conditions met
+        if sum(temps) == 10 or sum(temps) == 0:
+            # Change volume
+            err_signal = q2.get()
+            delta = delta # The larger this number, the longer it should take to reach the target volume
+            nu = abs(err_signal / delta) # "Learning rate" / "sensitivity" of volume adjustment
+            volume_value.value = comparator(file, err_signal, current_volume, W, min_threshold.value,max_threshold.value, nu)                
+            current_volume = volume_value.value # set the "current_volume" in modulating_volume function into new_volume because we always get 21, 19, 20
+            temps = []
+        else:
+            temps = []
+            continue
+                  
+                
+    print('volume modulation stopped')
     
-def comparator(file, signal, current_vol, window=10, v_threshold=100, nu=1):
+def comparator(file, signal, current_vol, window, min_threshold,max_threshold, nu):
     # nu : the step size of volume being increased or decreased, in percent, ex: 1 = 1%
     # v_threshold : upper limit of the difference between the mics values
     # return: new volume
     # new volume must not be more than 100 and less than 10
-    
-    #initialize new volume
-    new_vol = current_vol
-    
+        
     # signal within the buffer range
-    if signal >=( -v_threshold-10.0)  and signal <= (v_threshold+10.0):
+    if signal >=(min_threshold)  and signal <= (max_threshold): # since the calibrated threshold is a single point, impossible to get the exact number again, we must do a plus/minus value
        new_vol = current_vol
-       print('same baseline, calc volume:', new_vol, 'difference', difference)
+       print('same baseline, calc volume:', new_vol, 'difference', signal)
  
-    elif signal < (-v_threshold-10.0): # signal decreased in amplitude above buffer range
+    elif signal < min_threshold: # signal decreased in amplitude above buffer range
         new_vol = current_vol + nu
-        print('ref smaller, calc volume:', new_vol, 'difference:', difference)
+        print('ref smaller, calc volume:', new_vol, 'difference:', signal)
     
-    elif signal > (v_threshold+10.0): # signal increased in amplitude above buffer range
+    elif signal > max_threshold: # signal increased in amplitude above buffer range
         new_vol = current_vol - nu
-        print('error smaller, calc volume:', new_vol, 'difference', difference)
-    
-    # Limit volume to be within [5,100] percent
-    if new_vol <5:
-        new_vol = 5
-        print('volume lowered to minimum 5')
+        print('error smaller, calc volume:', new_vol, 'difference', signal)
 
-    elif new_vol > 100:
-        new_vol = 100
-        print('volume maxed to 100')
+#    elif signal == v_threshold:
+#        new_vol = current_vol
+    # Limit volume to be within [5,100] percent
+#     if new_vol <5:
+#         new_vol = 5
+# #         print('volume lowered to minimum 5')
+# 
+#     elif new_vol > 100:
+#         new_vol = 100
+# #         print('volume maxed to 100')
         
     #   save data of volume difference in csv file
     file = open(file,'a')
@@ -229,7 +269,7 @@ def whitenoise(volume_value, stop_event):
 #     
 #     
      # start stream
-    while not stop_event.wait(0.1):
+    while not stop_event.wait(1):
         stream3.start_stream()         
          # control how long the stream to play
         time.sleep(10)
@@ -267,7 +307,7 @@ def set_volume(datalist,volume):
 #         chunk = np.frombuffer(datalist,fromType).astype(np.float)
 #         chunk = chunk*sound_level
 #         datalist = chunk.astype(np.int16)
-#     
+    
 #     elif volume > 100:
 #         sound_level = (100/100.)
 #         fromType = np.int16
@@ -295,18 +335,19 @@ def thread_mask():
     
     print('Enter window size:')
     window = int(input())
-    print('Enter max_size:')
-    maxsize = int(input())
+#     print('Enter max_size:')
+#     maxsize = int(input())
     print('Enter delta:')
     delta = int(input())
-    logging.info('delta:' + str(delta))
     
-    vol_threshold = mp.Value('d', 10.0) # initial value of threshold value
-    calibrate_duration = 3*60 # in seconds
-    volume_value = mp.Value('d', 10.0)
+    min_threshold = mp.Value('d', 100.0) # initial value of threshold value
+    max_threshold = mp.Value('d',300.0) 
+
+    calibrate_duration = 200 # data points
+    volume_value = mp.Value('d', 50.0)
     
-    q1 = mp.Queue(maxsize)
-    q2 = mp.Queue(maxsize)
+    q1 = mp.Queue()
+    q2 = mp.Queue()
     
     print('Start at ', datetime.now())
     
@@ -314,11 +355,13 @@ def thread_mask():
     p1 = mp.Process(target=error_mic, args=(q1,stop_event))
     p2 = mp.Process(target=whitenoise, args=(volume_value, stop_event))
     p3 = mp.Process(target=moving_average, args=(q1, q2, stop_event, window))
-    p4 = mp.Process(target=main_volume_modulation, args = (q2, delta,volume_value, stop_event,vol_threshold, calibrate_duration, window))
+    p4 = mp.Process(target=main_volume_modulation, args = (q2, delta,volume_value, stop_event,min_threshold,max_threshold, calibrate_duration, window))
     
     p1.start()
     p2.start()
+    time.sleep(10)
     p3.start()
+    time.sleep(20)
     p4.start()
     
     
@@ -340,3 +383,7 @@ if __name__ == '__main__':
     # timeout for stop_event.wait(0.1) must be the same for all functions for volume modulation to not have pre-termination.
     # Does timeout cause data to be collected every 0.1s or previously 0.5s? Yes. and stop_event.wait(cannot be blank) 
 
+    # Moving Average is slower at putting into q2 than Volume modulation
+    # - volume modulation consume 6 q2.get() within _ s, whereas Moving average is putting 1 q2.put() every __ s
+# PROBLEM: SLOW!!!!!
+# I removed the maxsize
