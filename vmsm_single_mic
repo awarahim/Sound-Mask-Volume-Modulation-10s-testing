@@ -67,7 +67,7 @@ def error_mic(q1, stop_event):
         rate=RATE,
         frames_per_buffer=FRAMES_PER_BUFFER,
         input=True,
-        input_device_index=2,
+        input_device_index=1,
         stream_callback = callback2)
             
     while not stop_event.wait(0.5): # data coming in is really fast, use 1s for the wait
@@ -155,20 +155,20 @@ def main_volume_modulation(q2, delta, volume_value, stop_event,min_threshold,max
        
     min_threshold.value,max_threshold.value = vol_diff_calibrate(q2, stop_event, duration)
     
-    print('volume modulation started')
-    
     time.sleep(20) # wait till q2 is filled again after calibration
     current_volume = volume_value.value # initializes current volume
 #     print('initial Q2 size:', q2.qsize())
     min_size = 5
     
+    print('volume modulation started')
+    start = time.time()
     while not stop_event.wait(0.1):
 #         print('Q2 size:', q2.qsize())
-    # Check if the signal decrease/increase consistently for the first 10 get, then trigger comparator to change volume
+    # Check if the signal decrease/increase consistently for the first 5 get, then trigger comparator to change volume
         temps = []
-        for _ in range(min_size):
+        for _ in range(min_size+1):
             temps.append(q2.get())
-        
+        print(len(temps))
         # Classify conditions
         for i in range(len(temps)-1):
             # Decreasing
@@ -180,9 +180,10 @@ def main_volume_modulation(q2, delta, volume_value, stop_event,min_threshold,max
             else: # temps[i]==temps[i+1]:
                 temps[i] = 2
                 
-        print(sum(temps))
+        print(temps, sum(temps[0:min_size])) # only take the first min_size element
+        
         # Trigger volume change based on conditions met
-        if sum(temps) == 10 or sum(temps) == 0:
+        if (sum(temps[0:min_size]) == min_size) or (sum(temps[0:min_size]) == 0):
             # Change volume
             err_signal = q2.get()
             delta = delta # The larger this number, the longer it should take to reach the target volume
@@ -190,11 +191,14 @@ def main_volume_modulation(q2, delta, volume_value, stop_event,min_threshold,max
             volume_value.value = comparator(file, err_signal, current_volume, W, min_threshold.value,max_threshold.value, nu)                
             current_volume = volume_value.value # set the "current_volume" in modulating_volume function into new_volume because we always get 21, 19, 20
             temps = []
+#            min_threshold.value,max_threshold.value = vol_diff_calibrate(q2,stop_event, duration)
         else:
             temps = []
             continue
-                  
-                
+        if time.time()-start > 60:
+           min_threshold.value, max_threshold.value = vol_diff_calibrate(q2,stop_event,duration)
+           start = time.time()
+
     print('volume modulation stopped')
     
 def comparator(file, signal, current_vol, window, min_threshold,max_threshold, nu):
@@ -216,12 +220,10 @@ def comparator(file, signal, current_vol, window, min_threshold,max_threshold, n
         new_vol = current_vol - nu
         print('error smaller, calc volume:', new_vol, 'difference', signal)
 
-#    elif signal == v_threshold:
-#        new_vol = current_vol
-    # Limit volume to be within [5,100] percent
-#     if new_vol <5:
-#         new_vol = 5
-# #         print('volume lowered to minimum 5')
+
+    # Limit volume to be always positive
+    if new_vol < 0:
+        new_vol = 0
 # 
 #     elif new_vol > 100:
 #         new_vol = 100
@@ -264,7 +266,7 @@ def whitenoise(volume_value, stop_event):
                      channels = WF.getnchannels(),
                      rate = WF.getframerate(),
                      output=True,
-                     output_device_index=1,
+                     output_device_index=0,
                      stream_callback=callback_speaker)
 #     
 #     
@@ -344,7 +346,7 @@ def thread_mask():
     max_threshold = mp.Value('d',300.0) 
 
     calibrate_duration = 200 # data points
-    volume_value = mp.Value('d', 50.0)
+    volume_value = mp.Value('d', 30.0)
     
     q1 = mp.Queue()
     q2 = mp.Queue()
@@ -385,5 +387,4 @@ if __name__ == '__main__':
 
     # Moving Average is slower at putting into q2 than Volume modulation
     # - volume modulation consume 6 q2.get() within _ s, whereas Moving average is putting 1 q2.put() every __ s
-# PROBLEM: SLOW!!!!!
-# I removed the maxsize
+
